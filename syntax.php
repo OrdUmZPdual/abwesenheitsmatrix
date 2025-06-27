@@ -19,7 +19,8 @@ class syntax_plugin_abwesenheitsmatrixpopup extends DokuWiki_Syntax_Plugin {
         if($mode != 'xhtml') return false;
 
         $url = DOKU_BASE . 'lib/plugins/abwesenheitsmatrixpopup/matrix.html';
-        $renderer->doc .= "<button onclick="window.open('$url','_blank','width=1200,height=800');">📝 Bearbeiten</button>";
+        $button = '<button onclick="window.open(\'' . $url . '\', \'_blank\', \'width=1200,height=800\');">📝 Bearbeiten</button>';
+        $renderer->doc .= $button;
         return true;
     }
 }
