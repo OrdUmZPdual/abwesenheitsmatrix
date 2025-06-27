@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Abwesenheitsmatrix</title>
+<style>
+table { border-collapse: collapse; width: 100%; font-size: 12px; user-select: none; }
+th, td { border: 1px solid #ccc; text-align: center; padding: 4px; min-width: 50px; }
+th.rotate { height: 120px; white-space: nowrap; vertical-align: bottom; }
+th.rotate > div { transform: rotate(-90deg); transform-origin: left bottom; white-space: nowrap; }
+select, input.namefield { width: 100%; font-size: 11px; }
+.selected { background-color: #cce5ff !important; }
+.popup { position: absolute; background: white; border: 1px solid #999; padding: 5px; z-index: 1000; }
+.add-btn { margin-top: 10px; padding: 6px 12px; }
+.del-btn { background: #d9534f; color: white; border: none; padding: 2px 6px; font-size: 12px; cursor: pointer; border-radius: 4px; }
+.name-cell { display: flex; gap: 4px; align-items: center; }
+.name-cell input { flex-grow: 1; }
+</style></head><body>
+<h3>Abwesenheitsmatrix – <span id="monatJahr"></span></h3>
+<table id="absenceTable"><thead><tr></tr></thead><tbody>
+<tr><td class="name-cell"><input class="namefield" value="Müller"><button class="del-btn" onclick="removeRow(this)">❌</button></td></tr>
+<tr><td class="name-cell"><input class="namefield" value="Meier"><button class="del-btn" onclick="removeRow(this)">❌</button></td></tr>
+</tbody></table>
+<button class="add-btn" onclick="addEmployee()">+ Mitarbeiter hinzufügen</button>
+<div id="popup" class="popup" style="display:none;"></div>
+<script>
+const reasons = ["", "KR", "UR", "FT", "BU", "WE", "EH", "BV", "FB", "FU", "AZ", "HO", "KO", "SO", "GE", "BF", "PR", "ST"];
+let selecting = false, selectedCells = [];
+
+function createDropdown() {
+  const s = document.createElement("select");
+  reasons.forEach(r => { const o = document.createElement("option"); o.value = r; o.text = r; s.appendChild(o); });
+  s.addEventListener("mousedown", e => e.stopPropagation());
+  return s;
+}
+function addDayCells(row, days) {
+  for (let d = 1; d <= days; d++) {
+    const td = document.createElement("td");
+    const select = createDropdown();
+    td.appendChild(select);
+    td.addEventListener("mousedown", () => startSelect(td));
+    td.addEventListener("mouseover", () => continueSelect(td));
+    td.addEventListener("mouseup", (e) => endSelect(e.pageX, e.pageY));
+    row.appendChild(td);
+  }
+}
+function initMatrix() {
+  const today = new Date(), year = today.getFullYear(), month = today.getMonth();
+  const days = new Date(year, month + 1, 0).getDate();
+  document.getElementById("monatJahr").textContent = today.toLocaleString('de-DE', { month: 'long', year: 'numeric' });
+  const table = document.getElementById("absenceTable");
+  const headerRow = table.tHead.rows[0];
+  const firstTh = document.createElement("th");
+  headerRow.appendChild(firstTh);
+  for (let d = 1; d <= days; d++) {
+    const th = document.createElement("th");
+    th.className = "rotate";
+    const div = document.createElement("div");
+    div.textContent = d;
+    th.appendChild(div);
+    headerRow.appendChild(th);
+  }
+  const rows = table.tBodies[0].rows;
+  for (let i = 0; i < rows.length; i++) addDayCells(rows[i], days);
+}
+function startSelect(cell) {
+  selecting = true; clearSelection(); cell.classList.add("selected"); selectedCells.push(cell);
+}
+function continueSelect(cell) {
+  if (!selecting || selectedCells.includes(cell)) return;
+  cell.classList.add("selected"); selectedCells.push(cell);
+}
+function endSelect(x, y) {
+  selecting = false; if (selectedCells.length === 0) return;
+  const popup = document.getElementById("popup"); popup.innerHTML = "";
+  const select = createDropdown();
+  select.addEventListener("change", () => {
+    const val = select.value;
+    selectedCells.forEach(c => {
+      const s = c.querySelector("select");
+      if (s) s.value = val;
+      c.classList.remove("selected");
+    });
+    popup.style.display = "none"; selectedCells = [];
+  });
+  popup.appendChild(select); popup.style.left = x + "px"; popup.style.top = y + "px"; popup.style.display = "block";
+}
+function clearSelection() {
+  selectedCells.forEach(cell => cell.classList.remove("selected")); selectedCells = [];
+}
+function addEmployee() {
+  const table = document.getElementById("absenceTable");
+  const days = table.tHead.rows[0].cells.length - 1;
+  const row = document.createElement("tr");
+  const nameCell = document.createElement("td");
+  nameCell.className = "name-cell";
+  const input = document.createElement("input"); input.className = "namefield";
+  const delBtn = document.createElement("button");
+  delBtn.className = "del-btn"; delBtn.innerHTML = "❌";
+  delBtn.onclick = function () { removeRow(this); };
+  nameCell.appendChild(input); nameCell.appendChild(delBtn); row.appendChild(nameCell);
+  addDayCells(row, days); table.tBodies[0].appendChild(row);
+}
+function removeRow(btn) {
+  if (confirm("Diesen Mitarbeiter wirklich löschen?")) {
+    const row = btn.closest("tr"); row.remove();
+  }
+}
+document.addEventListener("mouseup", () => selecting = false); initMatrix();
+</script>
+</body></html>
