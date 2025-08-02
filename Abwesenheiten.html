@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Abwesenheitskalender – Kein Überlaufen mehr</title>
+  <title>Abwesenheitskalender – Optimal angepasst</title>
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
@@ -21,7 +21,8 @@
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.05);
       padding: 20px;
-      overflow-x: auto;
+      max-width: 100%;
+      overflow-x: hidden;
     }
 
     .button-bar {
@@ -46,8 +47,7 @@
     table {
       border-collapse: collapse;
       width: 100%;
-      table-layout: fixed; /* Fixiert das Layout */
-      margin-bottom: 20px;
+      table-layout: auto;
     }
 
     th, td {
@@ -56,7 +56,6 @@
       padding: 8px;
       height: 32px;
       user-select: none;
-      word-wrap: break-word;
       overflow-wrap: break-word;
     }
 
@@ -67,10 +66,12 @@
 
     td.name-cell {
       text-align: left;
-      white-space: normal;
-      word-break: break-word;
-      max-width: 200px;
-      min-width: 120px;
+      white-space: nowrap;
+      width: 1%;
+    }
+
+    td:not(.name-cell) {
+      max-width: 30px;
     }
 
     .entry {
