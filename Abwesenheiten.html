@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Abwesenheitskalender – Name optimiert</title>
+  <title>Abwesenheitskalender – Adaptive Tageszellen</title>
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
@@ -22,7 +22,7 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.05);
       padding: 20px;
       max-width: 100%;
-      overflow-x: hidden;
+      overflow-x: auto;
     }
 
     .button-bar {
@@ -48,15 +48,15 @@
       border-collapse: collapse;
       width: 100%;
       table-layout: auto;
+      min-width: 600px;
     }
 
     th, td {
       border: 1px solid #dfe6ee;
       text-align: center;
-      padding: 8px;
+      padding: 4px;
       height: 32px;
       user-select: none;
-      overflow-wrap: break-word;
     }
 
     th {
@@ -68,12 +68,16 @@
       text-align: left;
       white-space: normal;
       width: 1%;
-      font-size: 0.9em;
+      font-size: 0.6em;
       line-height: 1.2;
     }
 
-    td:not(.name-cell) {
-      max-width: 30px;
+    td:not(.name-cell),
+    th:not(.name-cell) {
+      min-width: 6px;
+      max-width: 40px;
+      width: 3%;
+      font-size: 0.9em;
     }
 
     .entry {
@@ -175,6 +179,7 @@
   for (let tag = 1; tag <= letzterTag; tag++) {
     const th = document.createElement("th");
     th.textContent = String(tag).padStart(2, '0');
+    th.classList.add("day-cell");
     theadRow.appendChild(th);
   }
 
@@ -201,6 +206,7 @@
 
     for (let tag = 1; tag <= letzterTag; tag++) {
       const td = document.createElement("td");
+      td.classList.add("day-cell");
       td.dataset.tag = tag;
       td.dataset.name = fullName;
 
