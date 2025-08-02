@@ -1,7 +1,7 @@
 base   abwesenheitsmatrixpopup
-author Klausi & Willi
-email  -
-date   2025-06-13
-name   Abwesenheitsmatrix Popup
+author Lukas
+email  - cw982320@charlottenburg-wilmersdorf.de
+date   2025-08-02
+name   Abwesenheitsmatrix
 desc   Zeigt einen Bearbeiten-Button, der ein Popup mit einer Abwesenheitsmatrix öffnet
 url    https://github.com/dein-github-user/abwesenheitsmatrixpopup
