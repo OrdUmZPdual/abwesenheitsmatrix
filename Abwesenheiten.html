@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Abwesenheitskalender – Dynamische Namensbreite</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f7f9fc;
+      margin: 30px;
+      color: #333;
+    }
+
+    h2 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+
+    .container {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      padding: 20px;
+    }
+
+    .button-bar {
+      margin-bottom: 20px;
+    }
+
+    .button-bar button {
+      margin-right: 8px;
+      padding: 6px 12px;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      background-color: #e3eaf2;
+      border-radius: 6px;
+      transition: background-color 0.2s ease;
+    }
+
+    .button-bar button:hover {
+      background-color: #c9d6e3;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      table-layout: auto; /* Dynamische Spaltenbreite */
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid #dfe6ee;
+      text-align: center;
+      padding: 8px;
+      height: 32px;
+      user-select: none;
+    }
+
+    th {
+      background-color: #ecf1f7;
+      font-weight: bold;
+    }
+
+    td.name-cell {
+      text-align: left;
+      white-space: nowrap;
+      width: auto;
+    }
+
+    .entry {
+      font-weight: bold;
+      color: #34495e;
+    }
+
+    .selected {
+      background-color: #d1e6fa !important;
+    }
+
+    .delete-btn {
+      color: #888;
+      float: right;
+      margin-left: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      visibility: hidden;
+    }
+
+    tr:hover .delete-btn {
+      visibility: visible;
+    }
+
+    .form-area {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .form-area input {
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      flex: 1;
+    }
+
+    .form-area button {
+      padding: 6px 12px;
+      background-color: #2c89d9;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .form-area button:hover {
+      background-color: #1f6fb4;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Abwesenheitsübersicht – <span id="monthLabel"></span></h2>
+
+<div class="container">
+  <div class="button-bar" id="buttonBar"></div>
+
+  <table id="absenceTable">
+    <thead>
+      <tr>
+        <th class="name-cell">Mitarbeiter</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="form-area">
+    <input type="text" id="vorname" placeholder="Vorname">
+    <input type="text" id="nachname" placeholder="Nachname">
+    <button onclick="addMitarbeiter()">Hinzufügen</button>
+  </div>
+</div>
+
+<script>
+  const kuerzel = ["K", "AU", "EK", "AUU"];
+  const mitarbeiter = [
+    { vorname: "Thomas", nachname: "Maier" },
+    { vorname: "Lea", nachname: "Schulz" },
+    { vorname: "Ayla", nachname: "Öztürk" }
+  ];
+
+  const selectedCells = new Set();
+  let isMouseDown = false;
+  let dragRow = null;
+
+  const heute = new Date();
+  const jahr = heute.getFullYear();
+  const monat = heute.getMonth();
+  const letzterTag = new Date(jahr, monat + 1, 0).getDate();
+  const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni",
+                      "Juli", "August", "September", "Oktober", "November", "Dezember"];
+  document.getElementById("monthLabel").textContent = `${monthNames[monat]} ${jahr}`;
+
+  const table = document.getElementById("absenceTable");
+  const theadRow = table.querySelector("thead tr");
+  const tbody = table.querySelector("tbody");
+
+  for (let tag = 1; tag <= letzterTag; tag++) {
+    const th = document.createElement("th");
+    th.textContent = String(tag).padStart(2, '0');
+    theadRow.appendChild(th);
+  }
+
+  function createRow(vorname, nachname) {
+    const name = `${nachname}, ${vorname}`;
+    const tr = document.createElement("tr");
+    const tdName = document.createElement("td");
+    tdName.className = "name-cell";
+    tdName.textContent = name;
+
+    const del = document.createElement("span");
+    del.textContent = "✖";
+    del.className = "delete-btn";
+    del.title = "Mitarbeiter entfernen";
+    del.onclick = () => {
+      if (confirm(`Möchten Sie ${name} wirklich aus der Liste entfernen?`)) {
+        tr.remove();
+      }
+    };
+
+    tdName.appendChild(del);
+    tr.appendChild(tdName);
+
+    for (let tag = 1; tag <= letzterTag; tag++) {
+      const td = document.createElement("td");
+      td.dataset.tag = tag;
+      td.dataset.name = name;
+
+      td.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        isMouseDown = true;
+        dragRow = td.parentElement;
+        toggleCell(td, e.ctrlKey);
+      });
+
+      td.addEventListener("mouseover", () => {
+        if (isMouseDown && td.parentElement === dragRow) {
+          toggleCell(td, true);
+        }
+      });
+
+      td.addEventListener("mouseup", () => {
+        isMouseDown = false;
+        dragRow = null;
+      });
+
+      tr.appendChild(td);
+    }
+
+    tbody.appendChild(tr);
+  }
+
+  mitarbeiter.forEach(m => createRow(m.vorname, m.nachname));
+
+  document.body.addEventListener("mouseup", () => {
+    isMouseDown = false;
+    dragRow = null;
+  });
+
+  function toggleCell(td, allowMulti) {
+    if (!allowMulti) {
+      selectedCells.forEach(cell => cell.classList.remove("selected"));
+      selectedCells.clear();
+    }
+    if (!selectedCells.has(td)) {
+      td.classList.add("selected");
+      selectedCells.add(td);
+    }
+  }
+
+  const buttonBar = document.getElementById("buttonBar");
+  const allButtons = [...kuerzel, "–"];
+  allButtons.forEach(kz => {
+    const btn = document.createElement("button");
+    btn.textContent = kz || "–";
+    btn.addEventListener("click", () => {
+      selectedCells.forEach(cell => {
+        cell.textContent = kz === "–" ? "" : kz;
+        cell.classList.remove("selected");
+      });
+      selectedCells.clear();
+    });
+    buttonBar.appendChild(btn);
+  });
+
+  function addMitarbeiter() {
+    const vn = document.getElementById("vorname").value.trim();
+    const nn = document.getElementById("nachname").value.trim();
+    if (vn && nn) {
+      createRow(vn, nn);
+      document.getElementById("vorname").value = "";
+      document.getElementById("nachname").value = "";
+    } else {
+      alert("Bitte Vor- und Nachnamen eingeben.");
+    }
+  }
+</script>
+
+</body>
+</html>
