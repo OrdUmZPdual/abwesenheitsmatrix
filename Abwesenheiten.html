@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Abwesenheitskalender – Optimal angepasst</title>
+  <title>Abwesenheitskalender – Name optimiert</title>
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
@@ -66,8 +66,10 @@
 
     td.name-cell {
       text-align: left;
-      white-space: nowrap;
+      white-space: normal;
       width: 1%;
+      font-size: 0.9em;
+      line-height: 1.2;
     }
 
     td:not(.name-cell) {
@@ -177,18 +179,19 @@
   }
 
   function createRow(vorname, nachname) {
-    const name = `${nachname}, ${vorname}`;
+    const nameHTML = `${nachname},<br>${vorname}`;
+    const fullName = `${nachname}, ${vorname}`;
     const tr = document.createElement("tr");
     const tdName = document.createElement("td");
     tdName.className = "name-cell";
-    tdName.textContent = name;
+    tdName.innerHTML = nameHTML;
 
     const del = document.createElement("span");
     del.textContent = "✖";
     del.className = "delete-btn";
     del.title = "Mitarbeiter entfernen";
     del.onclick = () => {
-      if (confirm(`Möchten Sie ${name} wirklich aus der Liste entfernen?`)) {
+      if (confirm(`Möchten Sie ${fullName} wirklich aus der Liste entfernen?`)) {
         tr.remove();
       }
     };
@@ -199,7 +202,7 @@
     for (let tag = 1; tag <= letzterTag; tag++) {
       const td = document.createElement("td");
       td.dataset.tag = tag;
-      td.dataset.name = name;
+      td.dataset.name = fullName;
 
       td.addEventListener("mousedown", (e) => {
         e.preventDefault();
