@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Abwesenheitskalender – Adaptive Tageszellen</title>
+  <meta charset="UTF-8" />
+  <title>Abwesenheitskalender – Bereichsgesteuert</title>
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
@@ -13,13 +13,13 @@
 
     h2 {
       color: #2c3e50;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
 
     .container {
       background-color: white;
       border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
       padding: 20px;
       max-width: 100%;
       overflow-x: auto;
@@ -68,13 +68,13 @@
       text-align: left;
       white-space: normal;
       width: 1%;
-      font-size: 0.6em;
+      font-size: 0.85em;
       line-height: 1.2;
     }
 
     td:not(.name-cell),
     th:not(.name-cell) {
-      min-width: 6px;
+      min-width: 24px;
       max-width: 40px;
       width: 3%;
       font-size: 0.9em;
@@ -106,6 +106,7 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      margin-top: 20px;
     }
 
     .form-area input {
@@ -131,7 +132,7 @@
 </head>
 <body>
 
-<h2>Abwesenheitsübersicht – <span id="monthLabel"></span></h2>
+<h2>Abwesenheitsübersicht – <span id="monthLabel"></span> <span id="bereichLabel"></span></h2>
 
 <div class="container">
   <div class="button-bar" id="buttonBar"></div>
@@ -146,20 +147,40 @@
   </table>
 
   <div class="form-area">
-    <input type="text" id="vorname" placeholder="Vorname">
-    <input type="text" id="nachname" placeholder="Nachname">
+    <input type="text" id="vorname" placeholder="Vorname" />
+    <input type="text" id="nachname" placeholder="Nachname" />
     <button onclick="addMitarbeiter()">Hinzufügen</button>
   </div>
 </div>
 
 <script>
-  const kuerzel = ["K", "AU", "EK", "AUU"];
-  const mitarbeiter = [
-    { vorname: "Thomas", nachname: "Maier" },
-    { vorname: "Lea", nachname: "Schulz" },
-    { vorname: "Ayla", nachname: "Öztürk" }
-  ];
+  // Bereich aus URL lesen
+  function getUrlParameter(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+  }
 
+  const bereich = getUrlParameter("bereich") || "pflege";
+
+  // Zuordnung Bereich → Mitarbeiterliste
+  const mitarbeiterListen = {
+    pflege: [
+      { vorname: "Thomas", nachname: "Maier" },
+      { vorname: "Lea", nachname: "Schulz" }
+    ],
+    technik: [
+      { vorname: "Max", nachname: "Muster" },
+      { vorname: "Julia", nachname: "Beispiel" }
+    ],
+    verwaltung: [
+      { vorname: "Mara", nachname: "Klein" },
+      { vorname: "Jonas", nachname: "Richter" }
+    ]
+  };
+
+  const mitarbeiter = mitarbeiterListen[bereich] || [];
+
+  const kuerzel = ["K", "AU", "EK", "AUU"];
   const selectedCells = new Set();
   let isMouseDown = false;
   let dragRow = null;
@@ -171,6 +192,7 @@
   const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni",
                       "Juli", "August", "September", "Oktober", "November", "Dezember"];
   document.getElementById("monthLabel").textContent = `${monthNames[monat]} ${jahr}`;
+  document.getElementById("bereichLabel").textContent = `(${bereich.charAt(0).toUpperCase() + bereich.slice(1)})`;
 
   const table = document.getElementById("absenceTable");
   const theadRow = table.querySelector("thead tr");
@@ -179,7 +201,6 @@
   for (let tag = 1; tag <= letzterTag; tag++) {
     const th = document.createElement("th");
     th.textContent = String(tag).padStart(2, '0');
-    th.classList.add("day-cell");
     theadRow.appendChild(th);
   }
 
@@ -206,7 +227,6 @@
 
     for (let tag = 1; tag <= letzterTag; tag++) {
       const td = document.createElement("td");
-      td.classList.add("day-cell");
       td.dataset.tag = tag;
       td.dataset.name = fullName;
 
