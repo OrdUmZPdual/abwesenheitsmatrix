@@ -130,13 +130,24 @@
     #saveButton:hover {
       background-color: #1f6fb4;
     }
+
+    .readonly td {
+      background-color: #f5f5f5;
+      color: #555;
+    }
+
+    .readonly .delete-btn,
+    .readonly .form-area,
+    .readonly #saveButton {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
 
-<h2>Abwesenheitsmatrix – <span id="monthLabel"></span> <span id="bereichLabel"></span></h2>
+<h2>Abwesenheitsmatrix – <span id="monatLabel"></span> <span id="bereichLabel"></span></h2>
 
-<div class="container">
+<div class="container" id="mainContainer">
   <div class="button-bar" id="buttonBar"></div>
 
   <table id="absenceTable">
@@ -148,7 +159,7 @@
     <tbody></tbody>
   </table>
 
-  <div class="form-area">
+  <div class="form-area" id="formArea">
     <input type="text" id="vorname" placeholder="Vorname" />
     <input type="text" id="nachname" placeholder="Nachname" />
     <button onclick="addMitarbeiter()">Hinzufügen</button>
@@ -161,16 +172,26 @@
   const selectedCells = new Set();
   let isMouseDown = false;
   let dragRow = null;
-  let mitarbeiter = [];
 
-  const bereich = new URLSearchParams(window.location.search).get("bereich") || "pflege";
-  const jahr = new Date().getFullYear();
-  const monat = new Date().getMonth();
-  const letzterTag = new Date(jahr, monat + 1, 0).getDate();
+  const urlParams = new URLSearchParams(window.location.search);
+  const bereich = urlParams.get("bereich") || "pflege";
+  const monatParam = urlParams.get("monat");
+
+  const now = new Date();
+  const aktuellerMonat = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const monat = monatParam || aktuellerMonat;
+
+  const isReadonly = monat < aktuellerMonat;
+
+  const [jahr, monatIndex] = monat.split("-");
+  const letzterTag = new Date(jahr, monatIndex, 0).getDate();
   const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni",
                       "Juli", "August", "September", "Oktober", "November", "Dezember"];
-  document.getElementById("monthLabel").textContent = `${monthNames[monat]} ${jahr}`;
+  document.getElementById("monatLabel").textContent = `${monthNames[parseInt(monatIndex, 10) - 1]} ${jahr}`;
   document.getElementById("bereichLabel").textContent = `(${bereich})`;
+
+  const container = document.getElementById("mainContainer");
+  if (isReadonly) container.classList.add("readonly");
 
   const table = document.getElementById("absenceTable");
   const theadRow = table.querySelector("thead tr");
@@ -186,18 +207,18 @@
     const nameHTML = `${nachname},<br>${vorname}`;
     const fullName = `${nachname}, ${vorname}`;
     const tr = document.createElement("tr");
+
     const tdName = document.createElement("td");
     tdName.className = "name-cell";
-    tdName.dataset.name = fullName; // ✅ DAS FEHLT!
+    tdName.dataset.name = fullName;
     tdName.innerHTML = nameHTML;
-
 
     const del = document.createElement("span");
     del.textContent = "✖";
     del.className = "delete-btn";
     del.title = "Mitarbeiter entfernen";
     del.onclick = () => {
-      if (confirm(`Möchten Sie ${fullName} wirklich aus der Liste entfernen?`)) {
+      if (!isReadonly && confirm(`Möchten Sie ${fullName} wirklich aus der Liste entfernen?`)) {
         tr.remove();
       }
     };
@@ -214,23 +235,25 @@
         td.textContent = daten[tag];
       }
 
-      td.addEventListener("mousedown", (e) => {
-        e.preventDefault();
-        isMouseDown = true;
-        dragRow = td.parentElement;
-        toggleCell(td, e.ctrlKey);
-      });
+      if (!isReadonly) {
+        td.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          isMouseDown = true;
+          dragRow = td.parentElement;
+          toggleCell(td, e.ctrlKey);
+        });
 
-      td.addEventListener("mouseover", () => {
-        if (isMouseDown && td.parentElement === dragRow) {
-          toggleCell(td, true);
-        }
-      });
+        td.addEventListener("mouseover", () => {
+          if (isMouseDown && td.parentElement === dragRow) {
+            toggleCell(td, true);
+          }
+        });
 
-      td.addEventListener("mouseup", () => {
-        isMouseDown = false;
-        dragRow = null;
-      });
+        td.addEventListener("mouseup", () => {
+          isMouseDown = false;
+          dragRow = null;
+        });
+      }
 
       tr.appendChild(td);
     }
@@ -255,6 +278,7 @@
   }
 
   function addMitarbeiter() {
+    if (isReadonly) return;
     const vn = document.getElementById("vorname").value.trim();
     const nn = document.getElementById("nachname").value.trim();
     if (vn && nn) {
@@ -267,6 +291,7 @@
   }
 
   function saveData() {
+    if (isReadonly) return;
     const rows = [...tbody.querySelectorAll("tr")];
     const data = {};
 
@@ -284,7 +309,7 @@
       data[name] = eintraege;
     });
 
-    fetch(`save.php?bereich=${encodeURIComponent(bereich)}`, {
+    fetch(`save.php?bereich=${encodeURIComponent(bereich)}&monat=${encodeURIComponent(monat)}`, {
       method: "POST",
       body: JSON.stringify(data),
       headers: { "Content-Type": "application/json" }
@@ -294,8 +319,7 @@
       .catch(err => alert("❌ Fehler beim Speichern"));
   }
 
-  // Daten beim Start laden
-  fetch(`get.php?bereich=${encodeURIComponent(bereich)}`)
+  fetch(`get.php?bereich=${encodeURIComponent(bereich)}&monat=${encodeURIComponent(monat)}`)
     .then(res => res.json())
     .then(json => {
       for (let name in json) {
@@ -307,22 +331,24 @@
       console.log("Keine gespeicherten Daten gefunden.");
     });
 
-  // Kürzel-Buttons aufbauen
   const buttonBar = document.getElementById("buttonBar");
   [...kuerzel, "–"].forEach(kz => {
     const btn = document.createElement("button");
     btn.textContent = kz || "–";
-    btn.addEventListener("click", () => {
-      selectedCells.forEach(cell => {
-        cell.textContent = kz === "–" ? "" : kz;
-        cell.classList.remove("selected");
+    if (!isReadonly) {
+      btn.addEventListener("click", () => {
+        selectedCells.forEach(cell => {
+          cell.textContent = kz === "–" ? "" : kz;
+          cell.classList.remove("selected");
+        });
+        selectedCells.clear();
       });
-      selectedCells.clear();
-    });
+    } else {
+      btn.disabled = true;
+    }
     buttonBar.appendChild(btn);
   });
 </script>
 
 </body>
 </html>
-
