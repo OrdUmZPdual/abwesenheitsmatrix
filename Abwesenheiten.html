@@ -44,6 +44,10 @@
       background-color: #c9d6e3;
     }
 
+    .month-select {
+      margin-bottom: 15px;
+    }
+
     table {
       border-collapse: collapse;
       width: 100%;
@@ -148,6 +152,12 @@
 <h2>Abwesenheitsmatrix – <span id="monatLabel"></span> <span id="bereichLabel"></span></h2>
 
 <div class="container" id="mainContainer">
+
+  <div class="month-select">
+    <label for="monthSelect"><strong>Monat auswählen:</strong></label>
+    <select id="monthSelect"></select>
+  </div>
+
   <div class="button-bar" id="buttonBar"></div>
 
   <table id="absenceTable">
@@ -168,10 +178,13 @@
 </div>
 
 <script>
-  const kuerzel = ["K", "Ko", "a", "U", "SU", "AA", "EDK", "Ü", "TZ", "MU", "EZ", "AU", "REH", "HM", "AZK", "FU", "PR"];
+  const kuerzel = ["K", "AU", "EK", "AUU"];
   const selectedCells = new Set();
   let isMouseDown = false;
   let dragRow = null;
+
+  const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni",
+                      "Juli", "August", "September", "Oktober", "November", "Dezember"];
 
   const urlParams = new URLSearchParams(window.location.search);
   const bereich = urlParams.get("bereich") || "pflege";
@@ -180,18 +193,39 @@
   const now = new Date();
   const aktuellerMonat = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const monat = monatParam || aktuellerMonat;
-
   const isReadonly = monat < aktuellerMonat;
 
   const [jahr, monatIndex] = monat.split("-");
   const letzterTag = new Date(jahr, monatIndex, 0).getDate();
-  const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni",
-                      "Juli", "August", "September", "Oktober", "November", "Dezember"];
+
   document.getElementById("monatLabel").textContent = `${monthNames[parseInt(monatIndex, 10) - 1]} ${jahr}`;
   document.getElementById("bereichLabel").textContent = `(${bereich})`;
 
   const container = document.getElementById("mainContainer");
   if (isReadonly) container.classList.add("readonly");
+
+  function buildMonthSelect() {
+    const select = document.getElementById("monthSelect");
+    const heute = new Date();
+    for (let i = 12; i >= 0; i--) {
+      const d = new Date(heute.getFullYear(), heute.getMonth() - i, 1);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const value = `${y}-${m}`;
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = `${monthNames[d.getMonth()]} ${y}`;
+      if (value === monat) option.selected = true;
+      select.appendChild(option);
+    }
+
+    select.addEventListener("change", () => {
+      const newMonat = select.value;
+      const url = new URL(window.location.href);
+      url.searchParams.set("monat", newMonat);
+      window.location.href = url.toString();
+    });
+  }
 
   const table = document.getElementById("absenceTable");
   const theadRow = table.querySelector("thead tr");
@@ -348,8 +382,9 @@
     }
     buttonBar.appendChild(btn);
   });
+
+  buildMonthSelect();
 </script>
 
 </body>
 </html>
-
