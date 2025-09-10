@@ -188,7 +188,9 @@
     const tr = document.createElement("tr");
     const tdName = document.createElement("td");
     tdName.className = "name-cell";
+    tdName.dataset.name = fullName; // ✅ DAS FEHLT!
     tdName.innerHTML = nameHTML;
+
 
     const del = document.createElement("span");
     del.textContent = "✖";
@@ -323,3 +325,4 @@
 
 </body>
 </html>
+
