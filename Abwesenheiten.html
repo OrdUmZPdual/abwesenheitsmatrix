@@ -162,7 +162,6 @@
 
   const bereich = getUrlParameter("bereich") || "pflege";
 
-  // Zuordnung Bereich → Mitarbeiterliste
   const mitarbeiterListen = {
     pflege: [
       { vorname: "Thomas", nachname: "Maier" },
@@ -232,8 +231,8 @@
 
       td.addEventListener("mousedown", (e) => {
         e.preventDefault();
-        isMouseDown = true;
         dragRow = td.parentElement;
+        isMouseDown = true;
         toggleCell(td, e.ctrlKey);
       });
 
