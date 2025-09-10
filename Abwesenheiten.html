@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Abwesenheitskalender – Adaptive Tageszellen</title>
+  <meta charset="UTF-8" />
+  <title>Abwesenheitsmatrix</title>
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
@@ -13,13 +13,13 @@
 
     h2 {
       color: #2c3e50;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
 
     .container {
       background-color: white;
       border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
       padding: 20px;
       max-width: 100%;
       overflow-x: auto;
@@ -68,13 +68,13 @@
       text-align: left;
       white-space: normal;
       width: 1%;
-      font-size: 0.6em;
+      font-size: 0.85em;
       line-height: 1.2;
     }
 
     td:not(.name-cell),
     th:not(.name-cell) {
-      min-width: 6px;
+      min-width: 24px;
       max-width: 40px;
       width: 3%;
       font-size: 0.9em;
@@ -106,6 +106,7 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      margin-top: 20px;
     }
 
     .form-area input {
@@ -115,7 +116,8 @@
       flex: 1;
     }
 
-    .form-area button {
+    .form-area button,
+    #saveButton {
       padding: 6px 12px;
       background-color: #2c89d9;
       color: white;
@@ -124,14 +126,15 @@
       cursor: pointer;
     }
 
-    .form-area button:hover {
+    .form-area button:hover,
+    #saveButton:hover {
       background-color: #1f6fb4;
     }
   </style>
 </head>
 <body>
 
-<h2>Abwesenheitsübersicht – <span id="monthLabel"></span></h2>
+<h2>Abwesenheitsmatrix – <span id="monthLabel"></span> <span id="bereichLabel"></span></h2>
 
 <div class="container">
   <div class="button-bar" id="buttonBar"></div>
@@ -146,31 +149,28 @@
   </table>
 
   <div class="form-area">
-    <input type="text" id="vorname" placeholder="Vorname">
-    <input type="text" id="nachname" placeholder="Nachname">
+    <input type="text" id="vorname" placeholder="Vorname" />
+    <input type="text" id="nachname" placeholder="Nachname" />
     <button onclick="addMitarbeiter()">Hinzufügen</button>
+    <button id="saveButton" onclick="saveData()">💾 Speichern</button>
   </div>
 </div>
 
 <script>
   const kuerzel = ["K", "AU", "EK", "AUU"];
-  const mitarbeiter = [
-    { vorname: "Thomas", nachname: "Maier" },
-    { vorname: "Lea", nachname: "Schulz" },
-    { vorname: "Ayla", nachname: "Öztürk" }
-  ];
-
   const selectedCells = new Set();
   let isMouseDown = false;
   let dragRow = null;
+  let mitarbeiter = [];
 
-  const heute = new Date();
-  const jahr = heute.getFullYear();
-  const monat = heute.getMonth();
+  const bereich = new URLSearchParams(window.location.search).get("bereich") || "pflege";
+  const jahr = new Date().getFullYear();
+  const monat = new Date().getMonth();
   const letzterTag = new Date(jahr, monat + 1, 0).getDate();
   const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni",
                       "Juli", "August", "September", "Oktober", "November", "Dezember"];
   document.getElementById("monthLabel").textContent = `${monthNames[monat]} ${jahr}`;
+  document.getElementById("bereichLabel").textContent = `(${bereich})`;
 
   const table = document.getElementById("absenceTable");
   const theadRow = table.querySelector("thead tr");
@@ -178,18 +178,19 @@
 
   for (let tag = 1; tag <= letzterTag; tag++) {
     const th = document.createElement("th");
-    th.textContent = String(tag).padStart(2, '0');
-    th.classList.add("day-cell");
+    th.textContent = String(tag).padStart(2, "0");
     theadRow.appendChild(th);
   }
 
-  function createRow(vorname, nachname) {
+  function createRow(vorname, nachname, daten = {}) {
     const nameHTML = `${nachname},<br>${vorname}`;
     const fullName = `${nachname}, ${vorname}`;
     const tr = document.createElement("tr");
     const tdName = document.createElement("td");
     tdName.className = "name-cell";
+    tdName.dataset.name = fullName; // ✅ DAS FEHLT!
     tdName.innerHTML = nameHTML;
+
 
     const del = document.createElement("span");
     del.textContent = "✖";
@@ -206,9 +207,12 @@
 
     for (let tag = 1; tag <= letzterTag; tag++) {
       const td = document.createElement("td");
-      td.classList.add("day-cell");
       td.dataset.tag = tag;
       td.dataset.name = fullName;
+
+      if (daten[tag]) {
+        td.textContent = daten[tag];
+      }
 
       td.addEventListener("mousedown", (e) => {
         e.preventDefault();
@@ -234,8 +238,6 @@
     tbody.appendChild(tr);
   }
 
-  mitarbeiter.forEach(m => createRow(m.vorname, m.nachname));
-
   document.body.addEventListener("mouseup", () => {
     isMouseDown = false;
     dragRow = null;
@@ -252,21 +254,6 @@
     }
   }
 
-  const buttonBar = document.getElementById("buttonBar");
-  const allButtons = [...kuerzel, "–"];
-  allButtons.forEach(kz => {
-    const btn = document.createElement("button");
-    btn.textContent = kz || "–";
-    btn.addEventListener("click", () => {
-      selectedCells.forEach(cell => {
-        cell.textContent = kz === "–" ? "" : kz;
-        cell.classList.remove("selected");
-      });
-      selectedCells.clear();
-    });
-    buttonBar.appendChild(btn);
-  });
-
   function addMitarbeiter() {
     const vn = document.getElementById("vorname").value.trim();
     const nn = document.getElementById("nachname").value.trim();
@@ -278,7 +265,64 @@
       alert("Bitte Vor- und Nachnamen eingeben.");
     }
   }
+
+  function saveData() {
+    const rows = [...tbody.querySelectorAll("tr")];
+    const data = {};
+
+    rows.forEach(row => {
+      const name = row.querySelector("td").dataset.name;
+      const tage = row.querySelectorAll("td:not(.name-cell)");
+      const eintraege = {};
+
+      tage.forEach(td => {
+        if (td.textContent.trim()) {
+          eintraege[td.dataset.tag] = td.textContent.trim();
+        }
+      });
+
+      data[name] = eintraege;
+    });
+
+    fetch(`save.php?bereich=${encodeURIComponent(bereich)}`, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json" }
+    })
+      .then(res => res.json())
+      .then(json => alert("✅ Abwesenheiten gespeichert!"))
+      .catch(err => alert("❌ Fehler beim Speichern"));
+  }
+
+  // Daten beim Start laden
+  fetch(`get.php?bereich=${encodeURIComponent(bereich)}`)
+    .then(res => res.json())
+    .then(json => {
+      for (let name in json) {
+        const [nachname, vorname] = name.split(", ");
+        createRow(vorname, nachname, json[name]);
+      }
+    })
+    .catch(() => {
+      console.log("Keine gespeicherten Daten gefunden.");
+    });
+
+  // Kürzel-Buttons aufbauen
+  const buttonBar = document.getElementById("buttonBar");
+  [...kuerzel, "–"].forEach(kz => {
+    const btn = document.createElement("button");
+    btn.textContent = kz || "–";
+    btn.addEventListener("click", () => {
+      selectedCells.forEach(cell => {
+        cell.textContent = kz === "–" ? "" : kz;
+        cell.classList.remove("selected");
+      });
+      selectedCells.clear();
+    });
+    buttonBar.appendChild(btn);
+  });
 </script>
 
 </body>
 </html>
+
