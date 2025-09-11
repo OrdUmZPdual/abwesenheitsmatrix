@@ -166,7 +166,19 @@
         <th class="name-cell">Mitarbeiter</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody>
+      <hr style="margin-top: 40px;">
+<h3>Legende der Abkürzungen</h3>
+<table style="width:100%; border-collapse: collapse; font-size: 0.9em;">
+  <thead>
+    <tr style="background:#ecf1f7;">
+      <th style="border:1px solid #ccc; padding:6px;">Abkürzung</th>
+      <th style="border:1px solid #ccc; padding:6px;">Bedeutung</th>
+    </tr>
+  </thead>
+  <tbody id="legendenTabelle"></tbody>
+</table>
+    </tbody>
   </table>
 
   <div class="form-area" id="formArea">
@@ -178,7 +190,26 @@
 </div>
 
 <script>
-  const kuerzel = ["K", "AU", "EK", "AUU"];
+  const kuerzelLegende = [
+  { code: "K",    text: "Krank mit Attest" },
+  { code: "Ko",   text: "Krank ohne Attest" },
+  { code: "a",    text: "Anwesend" },
+  { code: "U",    text: "Urlaub" },
+  { code: "SU",   text: "Sonderurlaub" },
+  { code: "AA",   text: "Arbeitsabbruch" },
+  { code: "EDK",  text: "Erkrankung d. Kindes" },
+  { code: "Ü",    text: "Überstunden/Zeit.ausgl." },
+  { code: "TZ",   text: "Regelfrei/Teilzeit" },
+  { code: "MU",   text: "Mutterschutz" },
+  { code: "EZ",   text: "Elternzeit" },
+  { code: "AU",   text: "Arbeitsunfall" },
+  { code: "REH",  text: "Reha/Kur" },
+  { code: "HM",   text: "Hamburger Modell" },
+  { code: "AZK",  text: "Arbeitszeitkonto" },
+  { code: "FU",   text: "Fehlt unentschuldigt" },
+  { code: "PR",   text: "Personalrat" }
+  ];
+
   const selectedCells = new Set();
   let isMouseDown = false;
   let dragRow = null;
@@ -366,25 +397,56 @@
     });
 
   const buttonBar = document.getElementById("buttonBar");
-  [...kuerzel, "–"].forEach(kz => {
-    const btn = document.createElement("button");
-    btn.textContent = kz || "–";
-    if (!isReadonly) {
-      btn.addEventListener("click", () => {
-        selectedCells.forEach(cell => {
-          cell.textContent = kz === "–" ? "" : kz;
-          cell.classList.remove("selected");
-        });
-        selectedCells.clear();
+
+kuerzelLegende.forEach(k => {
+  const btn = document.createElement("button");
+  btn.textContent = k.code;
+  if (!isReadonly) {
+    btn.addEventListener("click", () => {
+      selectedCells.forEach(cell => {
+        cell.textContent = k.code;
+        cell.classList.remove("selected");
       });
-    } else {
-      btn.disabled = true;
-    }
-    buttonBar.appendChild(btn);
+      selectedCells.clear();
+    });
+  } else {
+    btn.disabled = true;
+  }
+  buttonBar.appendChild(btn);
+});
+
+// Button für „–“ zum Leeren
+const leerBtn = document.createElement("button");
+leerBtn.textContent = "–";
+leerBtn.title = "Zelle leeren";
+if (!isReadonly) {
+  leerBtn.addEventListener("click", () => {
+    selectedCells.forEach(cell => {
+      cell.textContent = "";
+      cell.classList.remove("selected");
+    });
+    selectedCells.clear();
   });
+} else {
+  leerBtn.disabled = true;
+}
+buttonBar.appendChild(leerBtn);
+
 
   buildMonthSelect();
+  // Legende dynamisch aufbauen
+const legendenTabelle = document.getElementById("legendenTabelle");
+kuerzelLegende.forEach(k => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td style="border:1px solid #ccc; padding:6px;"><strong>${k.code}</strong></td>
+    <td style="border:1px solid #ccc; padding:6px;">${k.text}</td>
+  `;
+  legendenTabelle.appendChild(tr);
+});
+
 </script>
 
 </body>
 </html>
+
