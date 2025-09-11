@@ -189,7 +189,7 @@
           <th>Abkürzung</th><th>Bedeutung</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody id="legendenBody"></tbody>
     </table>
   </div>
 
@@ -197,7 +197,7 @@
     <thead>
       <tr>
         <th class="name-cell">Mitarbeiter</th>
-      </tr>
+              </tr>
     </thead>
     <tbody></tbody>
   </table>
@@ -352,7 +352,6 @@
 
     tbody.appendChild(tr);
   }
-
   document.body.addEventListener("mouseup", () => {
     isMouseDown = false;
     dragRow = null;
@@ -457,7 +456,7 @@
   buttonBar.appendChild(leerBtn);
 
   // Legendentabelle aufbauen
-  const tbody = document.querySelector("#legendenTabelle tbody");
+  const legendenBody = document.getElementById("legendenBody");
   for (let i = 0; i < kuerzelLegende.length; i += 3) {
     const tr = document.createElement("tr");
     for (let j = 0; j < 3; j++) {
@@ -468,7 +467,7 @@
         tr.innerHTML += `<td></td><td></td>`;
       }
     }
-    tbody.appendChild(tr);
+    legendenBody.appendChild(tr);
   }
 
   buildMonthSelect();
