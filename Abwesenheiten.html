@@ -25,12 +25,6 @@
       overflow-x: auto;
     }
 
-    .critical {
-      background-color: #f8d7da !important;
-      color: #a94442;
-      font-weight: bold;
-    }
-
     .month-select {
       margin-bottom: 15px;
     }
@@ -75,13 +69,13 @@
       display: none;
     }
 
-    .weekend {
-      background-color: #eee !important;
-      color: #999;
-      pointer-events: none;
-    }
+	.weekend {
+  background-color: #eee !important;
+  color: #999;
+  pointer-events: none;
+}
 
-    
+
     table {
       border-collapse: collapse;
       width: 100%;
@@ -149,6 +143,13 @@
       flex: 1;
     }
 
+	.critical {
+		background-color: #f8d7da !important;
+		color: #a94442;
+		font-weight: bold;
+	}
+
+
     .form-area button,
     #saveButton {
       padding: 6px 12px;
@@ -179,6 +180,7 @@
 <body>
 
 <h2>Abwesenheitsmatrix – <span id="monatLabel"></span> <span id="bereichLabel"></span></h2>
+<h2 id="bereichAnzeige" style="margin-top: 5px; color: #555;"></h2>
 
 <div class="container" id="mainContainer">
 
@@ -312,8 +314,7 @@
   }
 
   theadRow.appendChild(th);
-  }
-
+}
 
   function createRow(vorname, nachname, daten = {}) {
     const nameHTML = `${nachname},<br>${vorname}`;
@@ -338,7 +339,7 @@
     tdName.appendChild(del);
     tr.appendChild(tdName);
 
-for (let tag = 1; tag <= letzterTag; tag++) {
+    for (let tag = 1; tag <= letzterTag; tag++) {
   const td = document.createElement("td");
   td.dataset.tag = tag;
   td.dataset.name = fullName;
@@ -351,11 +352,11 @@ for (let tag = 1; tag <= letzterTag; tag++) {
   }
 
   if (daten[tag]) {
-    td.textContent = daten[tag];
-      if (["K", "Ko", "EDK"].includes(daten[tag])) {
-        td.classList.add("critical");
-      }
-  }
+	td.textContent = daten[tag];
+		if (["K", "Ko", "EDK"].includes(daten[tag])) {
+			td.classList.add("critical");
+		}
+	}
 
   if (!isReadonly && !isWeekend) {
     td.addEventListener("mousedown", (e) => {
@@ -404,7 +405,7 @@ for (let tag = 1; tag <= letzterTag; tag++) {
     const nn = document.getElementById("nachname").value.trim();
     if (vn && nn) {
       createRow(vn, nn);
-      sortTable();
+	  sortTable();
       document.getElementById("vorname").value = "";
       document.getElementById("nachname").value = "";
     } else {
@@ -441,19 +442,39 @@ for (let tag = 1; tag <= letzterTag; tag++) {
       .catch(err => alert("❌ Fehler beim Speichern"));
   }
 
-  fetch(`get.php?bereich=${encodeURIComponent(bereich)}&monat=${encodeURIComponent(monat)}`)
+const personFilter = urlParams.get("person");
+
+const fetchUrl = personFilter
+  ? `get.php?monat=${encodeURIComponent(monat)}&person=${encodeURIComponent(personFilter)}`
+  : `get.php?bereich=${encodeURIComponent(bereich)}&monat=${encodeURIComponent(monat)}`;
+
+fetch(fetchUrl)
   .then(res => res.json())
   .then(json => {
-    const sortedNames = Object.keys(json).sort((a, b) => {
-      const [nachA] = a.split(", ");
-      const [nachB] = b.split(", ");
-      return nachA.localeCompare(nachB);
-    });
+    if (personFilter) {
+      const daten = json.daten;
+      const bereichGefunden = json.bereich || "Unbekannt";
 
-    sortedNames.forEach(name => {
-      const [nachname, vorname] = name.split(", ");
-      createRow(vorname, nachname, json[name]);
-    });
+      document.getElementById("bereichAnzeige").textContent = `Bereich: ${bereichGefunden}`;
+
+      Object.keys(daten).forEach(name => {
+        const [nachname, vorname] = name.split(", ");
+        createRow(vorname, nachname, daten[name]);
+      });
+    } else {
+      document.getElementById("bereichAnzeige").textContent = `Bereich: ${bereich}`;
+      
+      const sortedNames = Object.keys(json).sort((a, b) => {
+        const [nachA] = a.split(", ");
+        const [nachB] = b.split(", ");
+        return nachA.localeCompare(nachB);
+      });
+
+      sortedNames.forEach(name => {
+        const [nachname, vorname] = name.split(", ");
+        createRow(vorname, nachname, json[name]);
+      });
+    }
   });
 
   // Kürzel-Buttons erstellen
@@ -463,17 +484,17 @@ for (let tag = 1; tag <= letzterTag; tag++) {
     btn.textContent = k.code;
     if (!isReadonly) {
       btn.addEventListener("click", () => {
-        selectedCells.forEach(cell => {
-          cell.textContent = k.code;
-          cell.classList.remove("selected");
-          if (["K", "Ko", "EDK"].includes(k.code)) {
-            cell.classList.add("critical");
-          } else {
-            cell.classList.remove("critical");
-          }
-        });
-        selectedCells.clear();
-      });
+		selectedCells.forEach(cell => {
+		cell.textContent = k.code;
+		cell.classList.remove("selected");
+			if (["K", "Ko", "EDK"].includes(k.code)) {
+				cell.classList.add("critical");
+			} else {
+				cell.classList.remove("critical");
+			}
+			});
+		selectedCells.clear();
+		});
     } else {
       btn.disabled = true;
     }
@@ -517,6 +538,3 @@ for (let tag = 1; tag <= letzterTag; tag++) {
 
 </body>
 </html>
-
-
-

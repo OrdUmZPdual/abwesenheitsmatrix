@@ -1,5 +1,5 @@
 base   abwesenheitsmatrix
-author Lukas
+author Lukas Schladebach
 email  - cw982320@charlottenburg-wilmersdorf.de
 date   2025-08-02
 name   Abwesenheitsmatrix
