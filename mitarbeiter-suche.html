@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mitarbeiter-Suche</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f4f7fb;
+      padding: 40px;
+      color: #333;
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 300px;
+    }
+    input, button {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    button {
+      background-color: #2c89d9;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1f6fb4;
+    }
+  </style>
+</head>
+<body>
+
+<h2>🔍 Mitarbeiter-Auswertung</h2>
+
+<form onsubmit="openMatrix(); return false;">
+  <input type="text" id="vorname" placeholder="Vorname" required />
+  <input type="text" id="nachname" placeholder="Nachname" required />
+  <button type="submit">Suchen</button>
+</form>
+
+<script>
+  function openMatrix() {
+    const vn = document.getElementById("vorname").value.trim();
+    const nn = document.getElementById("nachname").value.trim();
+    const name = encodeURIComponent(`${nn}, ${vn}`);
+    const monat = new Date().toISOString().slice(0, 7); // aktueller Monat
+
+    const url = `/lib/plugins/abwesenheitsmatrix/abwesenheiten.html?bereich=alle&monat=${monat}&person=${name}`;
+    window.open(url, 'popup', 'width=1200,height=800,resizable=yes,scrollbars=yes');
+  }
+</script>
+
+</body>
+</html>
