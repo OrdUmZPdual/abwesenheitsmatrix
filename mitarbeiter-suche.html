@@ -53,7 +53,7 @@
     const name = encodeURIComponent(`${nn}, ${vn}`);
     const monat = new Date().toISOString().slice(0, 7); // aktueller Monat
 
-    const url = `/lib/plugins/abwesenheitsmatrix/abwesenheiten.html?bereich=alle&monat=${monat}&person=${name}`;
+    const url = `/OrdUm-ZP_Wiki/lib/plugins/abwesenheitsmatrix/abwesenheiten.html?bereich=alle&monat=${monat}&person=${name}`;
     window.open(url, 'popup', 'width=1200,height=800,resizable=yes,scrollbars=yes');
   }
 </script>
