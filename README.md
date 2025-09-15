@@ -7,8 +7,8 @@ Um das Popup in Dokuwiki aufrufen zu können folgendes eingeben:
 \</html>
 
 Für die Mitarbeitersuche folgendes ein die Seite eingeben:
-\
-<html>
-<button onclick="window.open('/lib/plugins/abwesenheitsmatrix/mitarbeiter-suche.html', 'popup', 'width=1200,height=800,resizable=yes,scrollbars=yes')">
-Mitarbeiter-Suche </button>
-</html>\
+
+\<html>
+\<button onclick="window.open('/lib/plugins/abwesenheitsmatrix/mitarbeiter-suche.html', 'popup', 'width=1200,height=800,resizable=yes,scrollbars=yes')">
+\Mitarbeiter-Suche </button>
+\</html>
