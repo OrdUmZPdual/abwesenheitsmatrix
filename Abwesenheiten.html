@@ -374,6 +374,7 @@
     const nn = document.getElementById("nachname").value.trim();
     if (vn && nn) {
       createRow(vn, nn);
+      sortTable();
       document.getElementById("vorname").value = "";
       document.getElementById("nachname").value = "";
     } else {
@@ -411,13 +412,19 @@
   }
 
   fetch(`get.php?bereich=${encodeURIComponent(bereich)}&monat=${encodeURIComponent(monat)}`)
-    .then(res => res.json())
-    .then(json => {
-      for (let name in json) {
-        const [nachname, vorname] = name.split(", ");
-        createRow(vorname, nachname, json[name]);
-      }
+  .then(res => res.json())
+  .then(json => {
+    const sortedNames = Object.keys(json).sort((a, b) => {
+      const [nachA] = a.split(", ");
+      const [nachB] = b.split(", ");
+      return nachA.localeCompare(nachB);
     });
+
+    sortedNames.forEach(name => {
+      const [nachname, vorname] = name.split(", ");
+      createRow(vorname, nachname, json[name]);
+    });
+  });
 
   // Kürzel-Buttons erstellen
   const buttonBar = document.getElementById("buttonBar");
@@ -475,3 +482,4 @@
 
 </body>
 </html>
+
