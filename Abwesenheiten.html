@@ -69,6 +69,13 @@
       display: none;
     }
 
+    .weekend {
+      background-color: #eee !important;
+      color: #999;
+      pointer-events: none;
+    }
+
+    
     table {
       border-collapse: collapse;
       width: 100%;
@@ -290,10 +297,17 @@
   const tbody = table.querySelector("tbody");
 
   for (let tag = 1; tag <= letzterTag; tag++) {
-    const th = document.createElement("th");
-    th.textContent = String(tag).padStart(2, "0");
-    theadRow.appendChild(th);
+  const date = new Date(jahr, parseInt(monatIndex) - 1, tag);
+  const th = document.createElement("th");
+  th.textContent = String(tag).padStart(2, "0");
+
+  if (date.getDay() === 0 || date.getDay() === 6) {
+    th.classList.add("weekend");
   }
+
+  theadRow.appendChild(th);
+  }
+
 
   function createRow(vorname, nachname, daten = {}) {
     const nameHTML = `${nachname},<br>${vorname}`;
@@ -318,37 +332,44 @@
     tdName.appendChild(del);
     tr.appendChild(tdName);
 
-    for (let tag = 1; tag <= letzterTag; tag++) {
-      const td = document.createElement("td");
-      td.dataset.tag = tag;
-      td.dataset.name = fullName;
+for (let tag = 1; tag <= letzterTag; tag++) {
+  const td = document.createElement("td");
+  td.dataset.tag = tag;
+  td.dataset.name = fullName;
 
-      if (daten[tag]) {
-        td.textContent = daten[tag];
+  const date = new Date(jahr, parseInt(monatIndex) - 1, tag);
+  const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+
+  if (isWeekend) {
+    td.classList.add("weekend");
+  }
+
+  if (daten[tag]) {
+    td.textContent = daten[tag];
+  }
+
+  if (!isReadonly && !isWeekend) {
+    td.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      isMouseDown = true;
+      dragRow = td.parentElement;
+      toggleCell(td, e.ctrlKey);
+    });
+
+    td.addEventListener("mouseover", () => {
+      if (isMouseDown && td.parentElement === dragRow) {
+        toggleCell(td, true);
       }
+    });
 
-      if (!isReadonly) {
-        td.addEventListener("mousedown", (e) => {
-          e.preventDefault();
-          isMouseDown = true;
-          dragRow = td.parentElement;
-          toggleCell(td, e.ctrlKey);
-        });
+    td.addEventListener("mouseup", () => {
+      isMouseDown = false;
+      dragRow = null;
+    });
+  }
 
-        td.addEventListener("mouseover", () => {
-          if (isMouseDown && td.parentElement === dragRow) {
-            toggleCell(td, true);
-          }
-        });
-
-        td.addEventListener("mouseup", () => {
-          isMouseDown = false;
-          dragRow = null;
-        });
-      }
-
-      tr.appendChild(td);
-    }
+  tr.appendChild(td);
+}
 
     tbody.appendChild(tr);
   }
@@ -482,4 +503,5 @@
 
 </body>
 </html>
+
 
