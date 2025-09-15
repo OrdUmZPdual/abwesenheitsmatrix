@@ -25,6 +25,12 @@
       overflow-x: auto;
     }
 
+    .critical {
+      background-color: #f8d7da !important;
+      color: #a94442;
+      font-weight: bold;
+    }
+
     .month-select {
       margin-bottom: 15px;
     }
@@ -346,6 +352,9 @@ for (let tag = 1; tag <= letzterTag; tag++) {
 
   if (daten[tag]) {
     td.textContent = daten[tag];
+      if (["K", "Ko", "EDK"].includes(daten[tag])) {
+        td.classList.add("critical");
+      }
   }
 
   if (!isReadonly && !isWeekend) {
@@ -457,6 +466,11 @@ for (let tag = 1; tag <= letzterTag; tag++) {
         selectedCells.forEach(cell => {
           cell.textContent = k.code;
           cell.classList.remove("selected");
+          if (["K", "Ko", "EDK"].includes(k.code)) {
+            cell.classList.add("critical");
+          } else {
+            cell.classList.remove("critical");
+          }
         });
         selectedCells.clear();
       });
@@ -503,5 +517,6 @@ for (let tag = 1; tag <= letzterTag; tag++) {
 
 </body>
 </html>
+
 
 
