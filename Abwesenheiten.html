@@ -32,7 +32,55 @@
     .button-bar {
       margin-bottom: 20px;
     }
+	
+	#mainContainer {
+  max-height: 600px;
+  overflow: auto;
+  border: 1px solid #ccc;
+  margin-top: 10px;
 
+}
+
+/* Tabelle */
+#absenceTable {
+  border-collapse: collapse;
+  width: max-content;
+}
+
+/* Alle Zellen */
+#absenceTable th,
+#absenceTable td {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+  min-width: 40px;
+  background-color: #fff; /* Einheitlicher Hintergrund */
+}
+
+/* Kopfzeile fixieren */
+#absenceTable thead th {
+  position: sticky;
+  top: 50px;
+  background-color: #f8f8f8;
+  z-index: 3;
+  box-shadow: 0 2px 2px rgba(0,0,0,0.05);
+}
+
+/* Namensspalte fixieren */
+.name-cell {
+  position: sticky;
+  left: 0;
+  background-color: #fdfdfd;
+  z-index: 2;
+  box-shadow: 2px 0 2px rgba(0,0,0,0.05);
+}
+
+/* Ecke oben links (Name + Tag 1) */
+.name-cell:first-child {
+  z-index: 4;
+  background-color: #f0f0f0;
+}
+	
     .button-bar button {
       margin-right: 8px;
       padding: 6px 12px;
@@ -175,6 +223,17 @@
     .readonly #saveButton {
       display: none !important;
     }
+	
+	.button-bar {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  padding: 10px;
+  z-index: 5;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  display: flex;
+  gap: 6px;
+}
   </style>
 </head>
 <body>
@@ -183,6 +242,7 @@
 <h2 id="bereichAnzeige" style="margin-top: 5px; color: #555;"></h2>
 
 <div class="container" id="mainContainer">
+<div id="zurueckContainer" style="margin-bottom: 10px;"></div>
 
   <div class="month-select">
     <label for="monthSelect"><strong>Monat auswählen:</strong></label>
@@ -438,7 +498,11 @@
       headers: { "Content-Type": "application/json" }
     })
       .then(res => res.json())
-      .then(json => alert("✅ Abwesenheiten gespeichert!"))
+      .then(json => {
+  alert("✅ Abwesenheiten gespeichert!");
+  datenGeändert = false;
+  window.close(); // Fenster schließen
+})
       .catch(err => alert("❌ Fehler beim Speichern"));
   }
 
@@ -518,6 +582,21 @@ fetch(fetchUrl)
   }
   buttonBar.appendChild(leerBtn);
 
+	const speichernBtn = document.createElement("button");
+speichernBtn.textContent = "💾 Speichern";
+speichernBtn.title = "Änderungen speichern und Fenster schließen";
+speichernBtn.style.marginLeft = "auto"; // optional: rechts ausrichten
+
+if (!isReadonly) {
+  speichernBtn.addEventListener("click", () => {
+    saveData(); // ruft deine bestehende Funktion auf
+  });
+} else {
+  speichernBtn.disabled = true;
+}
+
+buttonBar.appendChild(speichernBtn);
+
   // Legendentabelle aufbauen
   const legendenBody = document.getElementById("legendenBody");
   for (let i = 0; i < kuerzelLegende.length; i += 3) {
@@ -534,6 +613,33 @@ fetch(fetchUrl)
   }
 
   buildMonthSelect();
+  
+  let datenGeändert = false;
+
+// Sobald eine Zelle bearbeitet wird
+document.addEventListener("input", () => {
+  datenGeändert = true;
+});
+
+// Warnung beim Schließen
+window.addEventListener("beforeunload", (e) => {
+  if (datenGeändert) {
+    e.preventDefault();
+    e.returnValue = ""; // Standardtext vom Browser
+  }
+});
+
+// Zurück-Button bei der Mitarbeiter Suche
+if (personFilter) {
+  const zurückBtn = document.createElement("button");
+  zurückBtn.textContent = "🔙 Zurück zur Suche";
+  zurückBtn.title = "Zurück zur Mitarbeitersuche";
+  zurückBtn.addEventListener("click", () => {
+    window.location.href = "/lib/plugins/abwesenheitsmatrix/mitarbeiter-suche.html";
+  });
+
+  document.getElementById("zurueckContainer").appendChild(zurückBtn);
+}
 </script>
 
 </body>
