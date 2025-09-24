@@ -12,10 +12,30 @@ if ($bereich && $bereich !== 'alle') {
     $bereich = preg_replace('/[^a-zA-Z0-9_\-]/', '', $bereich);
     $filename = "$dir/abwesenheiten_{$bereich}_{$monat}.json";
 
-    if (!file_exists($filename)) {
-        echo json_encode([]); // Leere Daten beim ersten Aufruf
+   if (!file_exists($filename)) {
+    // Vormonat berechnen
+    $date = DateTime::createFromFormat('Y-m', $monat);
+    $date->modify('-1 month');
+    $prevMonat = $date->format('Y-m');
+    $prevFile = "$dir/abwesenheiten_{$bereich}_{$prevMonat}.json";
+
+    if (file_exists($prevFile)) {
+        // Mitarbeiter aus Vormonat übernehmen
+        $prevData = json_decode(file_get_contents($prevFile), true);
+        $newData = [];
+        foreach ($prevData as $name => $tage) {
+            $newData[$name] = []; // nur Namen übernehmen, Abwesenheiten leeren
+        }
+        // Neue Datei für aktuellen Monat anlegen
+        file_put_contents($filename, json_encode($newData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        echo json_encode($newData);
+        exit;
+    } else {
+        // Weder aktueller noch Vormonat vorhanden → leere Liste
+        echo json_encode([]);
         exit;
     }
+}
 
     echo file_get_contents($filename);
     exit;
