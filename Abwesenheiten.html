@@ -4,65 +4,58 @@
   <meta charset="UTF-8" />
   <title>Abwesenheitsmatrix</title>
   <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background-color: #f7f9fc;
-      margin: 30px;
-      color: #333;
-    }
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f7f9fc;
+  color: #333;
+}
 
-    h2 {
-      color: #2c3e50;
-      margin-bottom: 10px;
-    }
+/* Kopf und Fuß fixieren */
+header, footer {
+  flex: 0 0 auto;
+  background: #fff;
+  padding: 10px 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  z-index: 10;
+}
 
-    .container {
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-      padding: 20px;
-      max-width: 100%;
-      overflow-x: auto;
-    }
-
-    .month-select {
-      margin-bottom: 15px;
-    }
-
-    .button-bar {
-      margin-bottom: 20px;
-    }
-	
-	#mainContainer {
-  max-height: 600px;
-  overflow: auto;
-  border: 1px solid #ccc;
-  margin-top: 10px;
-
+/* Scrollbarer Mittelteil */
+main {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 20px;
+  background: #fff;
 }
 
 /* Tabelle */
 #absenceTable {
   border-collapse: collapse;
-  width: max-content;
+  width: 100%;
+  table-layout: fixed;
+  min-width: 600px;
 }
 
-/* Alle Zellen */
 #absenceTable th,
 #absenceTable td {
-  padding: 6px 10px;
   border: 1px solid #ddd;
   text-align: center;
-  min-width: 40px;
-  background-color: #fff; /* Einheitlicher Hintergrund */
+  padding: 4px;
+  min-width: 28px;
+  font-size: 0.8em;
+  background: #fff;
 }
 
-/* Kopfzeile fixieren */
+/* Kopfzeile bleibt beim Scrollen sichtbar */
 #absenceTable thead th {
   position: sticky;
-  top: 60px;
-  background-color: #f8f8f8;
-  z-index: 3;
+  top: 0;
+  background: #f8f8f8;
+  z-index: 2;
   box-shadow: 0 2px 2px rgba(0,0,0,0.05);
 }
 
@@ -70,220 +63,161 @@
 .name-cell {
   position: sticky;
   left: 0;
-  background-color: #fdfdfd;
-  z-index: 2;
-  box-shadow: 2px 0 2px rgba(0,0,0,0.05);
+  background: #fdfdfd;
+  z-index: 3;
+  text-align: left;
+  width: 200px;
+  font-size: 0.85em;
+  line-height: 1.2;
+  white-space: normal;
 }
 
-/* Ecke oben links (Name + Tag 1) */
+/* Ecke oben links */
 .name-cell:first-child {
   z-index: 4;
   background-color: #f0f0f0;
 }
-	
-    .button-bar button {
-      margin-right: 8px;
-      padding: 6px 12px;
-      font-weight: bold;
-      cursor: pointer;
-      border: none;
-      background-color: #e3eaf2;
-      border-radius: 6px;
-      transition: background-color 0.2s ease;
-    }
 
-    .button-bar button:hover {
-      background-color: #c9d6e3;
-    }
+/* Buttons */
+.button-bar button,
+.form-area button,
+#saveButton {
+  margin-right: 8px;
+  padding: 6px 12px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  background-color: #e3eaf2;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
 
-    .legend-toggle {
-      margin-bottom: 10px;
-    }
+.button-bar button:hover,
+.form-area button:hover,
+#saveButton:hover {
+  background-color: #c9d6e3;
+}
 
-    .legend-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.75em;
-      margin-bottom: 10px;
-    }
+/* Legende */
+.legend-toggle { margin-bottom: 10px; }
+.legend-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75em;
+  margin-bottom: 10px;
+}
+.legend-table th, .legend-table td {
+  border: 1px solid #ccc;
+  padding: 4px 6px;
+  text-align: left;
+}
+.legend-hidden { display: none; }
 
-    .legend-table th, .legend-table td {
-      border: 1px solid #ccc;
-      padding: 4px 6px;
-      text-align: left;
-    }
+/* Formular unten */
+.form-area {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.form-area input {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  flex: 1;
+}
+.form-area button,
+#saveButton {
+  padding: 6px 12px;
+  background-color: #2c89d9;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.form-area button:hover,
+#saveButton:hover {
+  background-color: #1f6fb4;
+}
 
-    .legend-hidden {
-      display: none;
-    }
-
-	.weekend {
+/* Wochenenden */
+.weekend {
   background-color: #eee !important;
   color: #999;
   pointer-events: none;
 }
 
+.selected {
+  background-color: #d1e6fa !important;
+}
 
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      table-layout: auto;
-      min-width: 600px;
-    }
-
-    th, td {
-      border: 1px solid #dfe6ee;
-      text-align: center;
-      padding: 4px;
-      height: 32px;
-      user-select: none;
-    }
-
-    th {
-      background-color: #ecf1f7;
-      font-weight: bold;
-    }
-
-    td.name-cell {
-      text-align: left;
-      white-space: normal;
-      width: 1%;
-      font-size: 0.85em;
-      line-height: 1.2;
-    }
-
-    td:not(.name-cell),
-    th:not(.name-cell) {
-      min-width: 24px;
-      max-width: 40px;
-      width: 3%;
-      font-size: 0.9em;
-    }
-
-    .selected {
-      background-color: #d1e6fa !important;
-    }
-
-    .delete-btn {
-      color: #888;
-      float: right;
-      margin-left: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      visibility: hidden;
-    }
-
-    tr:hover .delete-btn {
-      visibility: visible;
-    }
-
-    .form-area {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 20px;
-    }
-
-    .form-area input {
-      padding: 6px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      flex: 1;
-    }
-
-	.critical {
-		background-color: #f8d7da !important;
-		color: #a94442;
-		font-weight: bold;
-	}
-
-
-    .form-area button,
-    #saveButton {
-      padding: 6px 12px;
-      background-color: #2c89d9;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .form-area button:hover,
-    #saveButton:hover {
-      background-color: #1f6fb4;
-    }
-
-    .readonly td {
-      background-color: #f5f5f5;
-      color: #555;
-    }
-
-    .readonly .delete-btn,
-    .readonly .form-area,
-    .readonly #saveButton {
-      display: none !important;
-    }
-	
-	.button-bar {
-  position: sticky;
-  top: 0;
-  background-color: #fff;
-  padding: 10px;
-  z-index: 5;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  display: flex;
-  gap: 6px;
+/*K/Ko/EDK rot färben*/
+.critical {
+  background-color: #f8d7da !important; /* hellrot */
+  color: #a94442;                       /* dunkler Rotton */
+  font-weight: bold;
 }
   </style>
 </head>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Abwesenheitsmatrix</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
 <body>
+  <header>
+    <h2>Abwesenheitsmatrix – <span id="monatLabel"></span> <span id="bereichLabel"></span></h2>
+    <h2 id="bereichAnzeige" style="margin-top: 5px; color: #555;"></h2>
 
-<h2>Abwesenheitsmatrix – <span id="monatLabel"></span> <span id="bereichLabel"></span></h2>
-<h2 id="bereichAnzeige" style="margin-top: 5px; color: #555;"></h2>
+    <div id="zurueckContainer"></div>
 
-<div class="container" id="mainContainer">
-<div id="zurueckContainer" style="margin-bottom: 10px;"></div>
+    <div class="month-select">
+      <label for="monthSelect"><strong>Monat auswählen:</strong></label>
+      <select id="monthSelect"></select>
+    </div>
 
-  <div class="month-select">
-    <label for="monthSelect"><strong>Monat auswählen:</strong></label>
-    <select id="monthSelect"></select>
-  </div>
+    <div class="button-bar" id="buttonBar"></div>
 
-  <div class="button-bar" id="buttonBar"></div>
+    <div class="legend-toggle">
+      <button onclick="toggleLegende()">🛈 Legende anzeigen</button>
+    </div>
 
-  <div class="legend-toggle">
-    <button onclick="toggleLegende()">🛈 Legende anzeigen</button>
-  </div>
+    <div id="legendeBox" class="legend-hidden">
+      <table class="legend-table" id="legendenTabelle">
+        <thead>
+          <tr>
+            <th>Abkürzung</th><th>Bedeutung</th>
+            <th>Abkürzung</th><th>Bedeutung</th>
+            <th>Abkürzung</th><th>Bedeutung</th>
+          </tr>
+        </thead>
+        <tbody id="legendenBody"></tbody>
+      </table>
+    </div>
+  </header>
 
-  <div id="legendeBox" class="legend-hidden">
-    <table class="legend-table" id="legendenTabelle">
+  <main>
+    <table id="absenceTable">
       <thead>
         <tr>
-          <th>Abkürzung</th><th>Bedeutung</th>
-          <th>Abkürzung</th><th>Bedeutung</th>
-          <th>Abkürzung</th><th>Bedeutung</th>
+          <th class="name-cell">Mitarbeiter</th>
         </tr>
       </thead>
-      <tbody id="legendenBody"></tbody>
+      <tbody></tbody>
     </table>
-  </div>
+  </main>
 
-  <table id="absenceTable">
-    <thead>
-      <tr>
-        <th class="name-cell">Mitarbeiter</th>
-              </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <div class="form-area" id="formArea">
-    <input type="text" id="vorname" placeholder="Vorname" />
-    <input type="text" id="nachname" placeholder="Nachname" />
-    <button onclick="addMitarbeiter()">Hinzufügen</button>
-    <button id="saveButton" onclick="saveData()">💾 Speichern</button>
-  </div>
-</div>
+  <footer>
+    <div class="form-area" id="formArea">
+      <input type="text" id="vorname" placeholder="Vorname" />
+      <input type="text" id="nachname" placeholder="Nachname" />
+      <button onclick="addMitarbeiter()">Hinzufügen</button>
+      <button id="saveButton" onclick="saveData()">💾 Speichern</button>
+    </div>
+  </footer>
+</body>
 
 <script>
   const kuerzelLegende = [
@@ -327,7 +261,7 @@
   document.getElementById("monatLabel").textContent = `${monthNames[parseInt(monatIndex, 10) - 1]} ${jahr}`;
   document.getElementById("bereichLabel").textContent = `(${bereich})`;
 
-  const container = document.getElementById("mainContainer");
+  const container = document.querySelector("main");
   if (isReadonly) container.classList.add("readonly");
 
   function toggleLegende() {
