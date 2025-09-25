@@ -157,6 +157,71 @@ main {
   color: #a94442;                       /* dunkler Rotton */
   font-weight: bold;
 }
+
+header, footer {
+  background: linear-gradient(90deg, #2c89d9, #5aa9e6);
+  color: white;
+  padding: 15px 25px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+header h2, footer h2 {
+  margin: 0;
+}
+
+#absenceTable {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+#absenceTable th {
+  background: #f0f4f9;
+  font-weight: 600;
+  font-size: 0.85em;
+  color: #333;
+}
+
+#absenceTable td {
+  transition: background 0.2s ease;
+}
+
+#absenceTable tbody tr:hover td {
+  background: #f9fcff;
+}
+
+.button-bar button,
+.form-area button,
+#saveButton {
+  background: #2c89d9;
+  color: white;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.button-bar button:hover,
+.form-area button:hover,
+#saveButton:hover {
+  background: #1f6fb4;
+  transform: translateY(-2px);
+}
+
+.delete-btn {
+  margin-left: 8px;
+  color: #d9534f;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: color 0.2s ease;
+}
+.delete-btn:hover {
+  color: #b52b27;
+}	  
   </style>
 </head>
 <!DOCTYPE html>
@@ -578,6 +643,7 @@ if (personFilter) {
 
 </body>
 </html>
+
 
 
 
