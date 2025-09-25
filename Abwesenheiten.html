@@ -279,7 +279,7 @@ header h2, footer h2 {
       <input type="text" id="vorname" placeholder="Vorname" />
       <input type="text" id="nachname" placeholder="Nachname" />
       <button onclick="addMitarbeiter()">Hinzufügen</button>
-      <button id="saveButton" onclick="saveData()">💾 Speichern</button>
+      <button id="saveButton" onclick="saveData()">💾 Speichern & Schließen</button>
     </div>
   </footer>
 </body>
@@ -582,7 +582,7 @@ fetch(fetchUrl)
   buttonBar.appendChild(leerBtn);
 
 	const speichernBtn = document.createElement("button");
-speichernBtn.textContent = "💾 Speichern";
+speichernBtn.textContent = "💾 Speichern & Schließen";
 speichernBtn.title = "Änderungen speichern und Fenster schließen";
 speichernBtn.style.marginLeft = "auto"; // optional: rechts ausrichten
 
@@ -643,6 +643,7 @@ if (personFilter) {
 
 </body>
 </html>
+
 
 
 
