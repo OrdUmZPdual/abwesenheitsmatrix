@@ -323,7 +323,7 @@ header h2, footer h2 {
   function buildMonthSelect() {
     const select = document.getElementById("monthSelect");
     const heute = new Date();
-    for (let i = 12; i >= 0; i--) {
+    for (let i = 0; i <= 1; i++) {
       const d = new Date(heute.getFullYear(), heute.getMonth() - i, 1);
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -626,4 +626,5 @@ if (personFilter) {
 </script>
 
 </body>
+
 </html>
