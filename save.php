@@ -40,12 +40,6 @@ $filename = "$dir/abwesenheiten_{$bereich}_{$monat}.json";
 file_put_contents($filename, $data);
 echo json_encode(["status" => "success"]);
 
-// E-Mail senden - Daten
-$subject = "Anwesenheiten erfasst in Bereich: $bereich";
-$recipient = 'OrdUmZ@charlottenburg-wilmersdorf.de'; // Zieladresse für die Benachrichtigung
-$message = "Anwesenheiten erfasst in Bereich: $bereich";
-
 // E-Mail senden - Befehl
 mail("OrdUmZ@charlottenburg-wilmersdorf.de", "Anwesenheiten bearbeitet im Bereich: $bereich", "Anwesenheiten bearbeitet im Bereich: $bereich");
-http_response_code(200); // Erfolgreicher Statuscode
 
