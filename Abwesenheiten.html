@@ -496,11 +496,19 @@ let dragDirection = null; // "row" oder "col"
       data[name] = eintraege;
     });
 
-    fetch(save.php?bereich=${encodeURIComponent(bereich)}&monat=${encodeURIComponent(monat)}, 
-	  {method: "POST", body: JSON.stringify(data), headers: 
-	   { "Content-Type": "application/json" } }) .then(res => res.json()) .then(json => { alert("✅ Anwesenheiten gespeichert!"); 
-	datenGeändert = false; window.close(); // Fenster schließen 
-		}) .catch(err => alert("❌ Fehler beim Speichern")); }
+    fetch(`save.php?bereich=${encodeURIComponent(bereich)}&monat=${encodeURIComponent(monat)}`, {
+  method: "POST",
+  body: JSON.stringify(data),
+  headers: { "Content-Type": "application/json" }
+})
+  .then(res => res.json())
+  .then(json => {
+    alert("✅ Anwesenheiten gespeichert!");
+    datenGeändert = false;
+    window.close(); // Fenster schließen
+  })
+  .catch(err => alert("❌ Fehler beim Speichern"));
+
 
 const personFilter = urlParams.get("person");
 
@@ -641,5 +649,6 @@ if (personFilter) {
 </body>
 
 </html>
+
 
 
