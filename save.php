@@ -40,18 +40,11 @@ $filename = "$dir/abwesenheiten_{$bereich}_{$monat}.json";
 file_put_contents($filename, $data);
 echo json_encode(["status" => "success"]);
 
-// E-Mail senden
+// E-Mail senden - Daten
 $subject = "Anwesenheiten erfasst in Bereich: $bereich";
 $recipient = 'OrdUmZ@charlottenburg-wilmersdorf.de'; // Zieladresse für die Benachrichtigung
 $message = "Anwesenheiten erfasst in Bereich: $bereich";
 
-// E-Mail-Header
-$headers = 'From: dokuwiki@halvar01.ba-cw.verwalt-berlin.de' . "\r\n" .
-           'X-Mailer: PHP/' . phpversion();
+// E-Mail senden - Befehl
+mail($recipient, $subject, $message) 
 
-// E-Mail senden
-if (mail($recipient, $subject, $message, $headers)) {
-    echo json_encode(["status" => "success", "message" => "Daten gespeichert und E-Mail gesendet"]);
-} else {
-    echo json_encode(["status" => "error", "message" => "Fehler beim E-Mail-Versand"]);
-}
