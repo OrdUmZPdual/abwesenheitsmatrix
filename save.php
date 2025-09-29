@@ -47,4 +47,5 @@ $message = "Anwesenheiten erfasst in Bereich: $bereich";
 
 // E-Mail senden - Befehl
 mail("OrdUmZ@charlottenburg-wilmersdorf.de", "Anwesenheiten bearbeitet im Bereich: $bereich", "Anwesenheiten bearbeitet im Bereich: $bereich");
+http_response_code(200); // Erfolgreicher Statuscode
 
