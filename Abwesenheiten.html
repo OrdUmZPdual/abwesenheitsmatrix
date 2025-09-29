@@ -507,7 +507,11 @@ let dragDirection = null; // "row" oder "col"
     datenGeändert = false;
     window.close(); // Fenster schließen
   })
-  .catch(err => alert("❌ Fehler beim Speichern"));
+  catch(err => {
+    // Fehlerausgabe direkt im catch-Block
+    console.error("Fehler beim Speichern:", err);  // Fehler in der Konsole ausgeben
+    alert("❌ Fehler: " + err);  // Fehler im UI anzeigen
+  });
 
 
 const personFilter = urlParams.get("person");
@@ -649,6 +653,7 @@ if (personFilter) {
 </body>
 
 </html>
+
 
 
 
