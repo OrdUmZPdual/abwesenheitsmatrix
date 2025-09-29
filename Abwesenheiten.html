@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>Abwesenheitsmatrix</title>
+  <title>Anwesenheitsmatrix</title>
   <style>
 body {
   display: flex;
@@ -148,7 +148,7 @@ main {
 }
 
 .selected {
-  background-color: #d1e6fa !important;
+  background-color: #eaf6ff !important; /* sehr helles, freundliches Blau */
 }
 
 /*K/Ko/EDK rot färben*/
@@ -212,12 +212,12 @@ header h2, footer h2 {
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>Abwesenheitsmatrix</title>
+  <title>Anwesenheitsmatrix</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <h2>Abwesenheitsmatrix – <span id="monatLabel"></span> <span id="bereichLabel"></span></h2>
+    <h2>Anwesenheitsmatrix – <span id="monatLabel"></span> <span id="bereichLabel"></span></h2>
     <h2 id="bereichAnzeige" style="margin-top: 5px; color: #555;"></h2>
 
     <div id="zurueckContainer"></div>
@@ -286,15 +286,18 @@ header h2, footer h2 {
     { code: "HM", text: "Hamburger Modell" },
     { code: "AZK", text: "Arbeitszeitkonto" },
     { code: "FU", text: "Fehlt unentschuldigt" },
-    { code: "BV", text: "Beschäftigtenvertretung" }
+    { code: "BV", text: "Beschäftigtenvertretung" },
+	{ code: "DR", text: "Dienstreise" }
   ];
 
   const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni",
                       "Juli", "August", "September", "Oktober", "November", "Dezember"];
 
-  const selectedCells = new Set();
-  let isMouseDown = false;
-  let dragRow = null;
+const selectedCells = new Set();
+let isMouseDown = false;
+let dragRow = null;
+let dragCol = null;
+let dragDirection = null; // "row" oder "col"
 
   const urlParams = new URLSearchParams(window.location.search);
   const bereich = urlParams.get("bereich") || "pflege";
@@ -323,7 +326,7 @@ header h2, footer h2 {
   function buildMonthSelect() {
     const select = document.getElementById("monthSelect");
     const heute = new Date();
-    for (let i = 12; i >= 0; i--) {
+    for (let i = 0; i <= 1; i++) {
       const d = new Date(heute.getFullYear(), heute.getMonth() - i, 1);
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -402,24 +405,40 @@ header h2, footer h2 {
 	}
 
   if (!isReadonly && !isWeekend) {
-    td.addEventListener("mousedown", (e) => {
-      e.preventDefault();
-      isMouseDown = true;
-      dragRow = td.parentElement;
-      toggleCell(td, e.ctrlKey);
-    });
+  td.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    isMouseDown = true;
+    dragRow = td.parentElement;
+    dragCol = td.cellIndex;
+    dragDirection = null; // Richtung wird erst beim Ziehen festgelegt
+    toggleCell(td, e.ctrlKey);
+  });
 
-    td.addEventListener("mouseover", () => {
-      if (isMouseDown && td.parentElement === dragRow) {
+  td.addEventListener("mouseover", () => {
+    if (isMouseDown) {
+      if (!dragDirection) {
+        if (td.parentElement === dragRow) {
+          dragDirection = "row";
+        } else if (td.cellIndex === dragCol) {
+          dragDirection = "col";
+        }
+      }
+
+      if (dragDirection === "row" && td.parentElement === dragRow) {
+        toggleCell(td, true);
+      } else if (dragDirection === "col" && td.cellIndex === dragCol) {
         toggleCell(td, true);
       }
-    });
+    }
+  });
 
-    td.addEventListener("mouseup", () => {
-      isMouseDown = false;
-      dragRow = null;
-    });
-  }
+  td.addEventListener("mouseup", () => {
+    isMouseDown = false;
+    dragRow = null;
+    dragCol = null;
+    dragDirection = null;
+  });
+}
 
   tr.appendChild(td);
 }
@@ -427,9 +446,11 @@ header h2, footer h2 {
     tbody.appendChild(tr);
   }
   document.body.addEventListener("mouseup", () => {
-    isMouseDown = false;
-    dragRow = null;
-  });
+  isMouseDown = false;
+  dragRow = null;
+  dragCol = null;
+  dragDirection = null;
+});
 
   function toggleCell(td, allowMulti) {
     if (!allowMulti) {
@@ -482,7 +503,7 @@ header h2, footer h2 {
     })
       .then(res => res.json())
       .then(json => {
-  alert("✅ Abwesenheiten gespeichert!");
+  alert("✅ Anwesenheiten gespeichert!");
   datenGeändert = false;
   window.close(); // Fenster schließen
 })
@@ -626,4 +647,5 @@ if (personFilter) {
 </script>
 
 </body>
+
 </html>
