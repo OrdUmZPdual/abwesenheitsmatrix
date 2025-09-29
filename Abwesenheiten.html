@@ -507,7 +507,7 @@ let dragDirection = null; // "row" oder "col"
   datenGeändert = false;
   window.close(); // Fenster schließen
 })
-      .catch(err => alert("❌ Fehler beim Speichern"));
+      .catch(err => alert("❌ Fehler beim Speichern" + err));
   }
 
 const personFilter = urlParams.get("person");
@@ -649,4 +649,5 @@ if (personFilter) {
 </body>
 
 </html>
+
 
