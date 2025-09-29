@@ -497,18 +497,33 @@ let dragDirection = null; // "row" oder "col"
     });
 
     fetch(`save.php?bereich=${encodeURIComponent(bereich)}&monat=${encodeURIComponent(monat)}`, {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: { "Content-Type": "application/json" }
-    })
-      .then(res => res.json())
-      .then(json => {
-  alert("✅ Anwesenheiten gespeichert!");
-  datenGeändert = false;
-  window.close(); // Fenster schließen
+  method: "POST",
+  body: JSON.stringify(data),
+  headers: { "Content-Type": "application/json" }
 })
-      .catch(err => alert("❌ Fehler beim Speichern" + err));
-  }
+  .then(res => {
+    // Falls der Statuscode nicht im Bereich 2xx liegt, werfen wir einen Fehler
+    if (!res.ok) {
+      return res.text().then(text => {
+        // Text aus der Antwort auslesen und im Fehlerfall eine detaillierte Nachricht anzeigen
+        throw new Error(`Fehler: ${res.status} - ${text}`);
+      });
+    }
+    // Antwort als JSON verarbeiten, falls sie OK ist
+    return res.json();
+  })
+  .then(json => {
+    // Wenn alles funktioniert hat, zeige eine Erfolgsnachricht
+    alert("✅ Anwesenheiten gespeichert!");
+    datenGeändert = false;
+    window.close(); // Fenster schließen
+  })
+  .catch(err => {
+    // Nur im Fehlerfall die Fehlermeldung anzeigen
+    alert("❌ Fehler beim Speichern: " + err.message);  // Fehler im UI anzeigen
+    console.error("Fehler beim Speichern:", err);  // Fehler in der Konsole ausgeben
+  });
+
 
 const personFilter = urlParams.get("person");
 
@@ -649,5 +664,6 @@ if (personFilter) {
 </body>
 
 </html>
+
 
 
