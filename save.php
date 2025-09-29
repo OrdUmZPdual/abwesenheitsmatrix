@@ -46,5 +46,5 @@ $recipient = 'OrdUmZ@charlottenburg-wilmersdorf.de'; // Zieladresse für die Ben
 $message = "Anwesenheiten erfasst in Bereich: $bereich";
 
 // E-Mail senden - Befehl
-mail($recipient, $subject, $message) 
+mail("OrdUmZ@charlottenburg-wilmersdorf.de", "Anwesenheiten bearbeitet im Bereich: $bereich", "Anwesenheiten bearbeitet im Bereich: $bereich");
 
