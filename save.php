@@ -18,6 +18,9 @@ if (!$data) {
     exit;
 }
 
+$decoded = json_decode($data, true);
+$anzahlMitarbeiter = is_array($decoded) ? count($decoded) : 0;
+
 $dir = __DIR__ . "/data";
 if (!is_dir($dir)) {
     mkdir($dir, 0755, true);
@@ -36,15 +39,26 @@ $einJahr = 365 * 24 * 60 * 60;
 	}
 
 // E-Mail senden - Befehl
+$heute = date("d.m.Y");
+$zeitstempel = date("d.m.Y H:i");
+
+$betreff = "Tägliche Bearbeitung – Bereich: $bereich ($heute)";
+$nachricht = "Hallo Team,\n\n".
+             "Die Anwesenheiten im Bereich \"$bereich\" wurden am $zeitstempel gespeichert.\n\n".
+             "Dies ist die tägliche Bearbeitung.\n".
+             "Anzahl bearbeiteter Mitarbeiter: $anzahlMitarbeiter\n\n".
+             "Viele Grüße\nEure Wissensdatenbank";
+
 @mail(
-    "OrdUmZ@charlottenburg-wilmersdorf.de",
-    "Anwesenheiten bearbeitet im Bereich: $bereich",
-    "Anwesenheiten bearbeitet im Bereich: $bereich"
+    "l.schladebach@outlook.de",
+    $betreff,
+    $nachricht,
+    "From: dokuwiki@halvar01.ba-cw.verwalt-berlin.de\r\n"
 );
 
 $filename = "$dir/abwesenheiten_{$bereich}_{$monat}.json";
 file_put_contents($filename, $data);
 //Statusmeldung
 echo json_encode(["status" => "success"]);
-
+exit;
 
