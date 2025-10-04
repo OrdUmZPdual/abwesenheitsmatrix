@@ -35,7 +35,16 @@ $einJahr = 365 * 24 * 60 * 60;
 		}
 	}
 
+// E-Mail senden - Befehl
+@mail(
+    "OrdUmZ@charlottenburg-wilmersdorf.de",
+    "Anwesenheiten bearbeitet im Bereich: $bereich",
+    "Anwesenheiten bearbeitet im Bereich: $bereich"
+);
 
 $filename = "$dir/abwesenheiten_{$bereich}_{$monat}.json";
 file_put_contents($filename, $data);
+//Statusmeldung
 echo json_encode(["status" => "success"]);
+
+

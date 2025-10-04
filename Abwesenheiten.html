@@ -151,7 +151,7 @@ main {
   background-color: #eaf6ff !important; /* sehr helles, freundliches Blau */
 }
 
-/*K/Ko/EDK rot färben*/
+/*k/ko/edk rot färben*/
 .critical {
   background-color: #f8d7da !important; /* hellrot */
   color: #a94442;                       /* dunkler Rotton */
@@ -266,38 +266,56 @@ header h2, footer h2 {
       <button id="saveButton" onclick="saveData()">💾 Speichern & Schließen</button>
     </div>
   </footer>
+<div id="eingabeOverlay" style="
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #2c89d9;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1.1em;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  display: none;
+  z-index: 1000;
+  pointer-events: none;
+">Eingabe: </div>
 </body>
 
 <script>
   const kuerzelLegende = [
-    { code: "K", text: "Krank mit Attest" },
-    { code: "Ko", text: "Krank ohne Attest" },
+    { code: "k", text: "Krank mit Attest" },
+    { code: "ko", text: "Krank ohne Attest" },
     { code: "a", text: "Anwesend" },
-    { code: "U", text: "Urlaub" },
-    { code: "SU", text: "Sonderurlaub" },
-    { code: "AA", text: "Arbeitsabbruch" },
-    { code: "EDK", text: "Erkrankung d. Kindes" },
-    { code: "Ü", text: "Überstunden/Zeit.ausgl." },
-    { code: "TZ", text: "Regelfrei/Teilzeit" },
-    { code: "MU", text: "Mutterschutz" },
-    { code: "EZ", text: "Elternzeit" },
-    { code: "AU", text: "Arbeitsunfall" },
-    { code: "REH", text: "Reha/Kur" },
-    { code: "HM", text: "Hamburger Modell" },
-    { code: "AZK", text: "Arbeitszeitkonto" },
-    { code: "FU", text: "Fehlt unentschuldigt" },
-    { code: "BV", text: "Beschäftigtenvertretung" },
-	{ code: "DR", text: "Dienstreise/Fortbildung" }
+    { code: "u", text: "Urlaub" },
+    { code: "su", text: "Sonderurlaub" },
+    { code: "aa", text: "Arbeitsabbruch" },
+    { code: "edk", text: "Erkrankung d. Kindes" },
+    { code: "ü", text: "Überstunden/Zeit.ausgl." },
+    { code: "tz", text: "Regelfrei/Teilzeit" },
+    { code: "mu", text: "Mutterschutz" },
+    { code: "ez", text: "Elternzeit" },
+    { code: "au", text: "Arbeitsunfall" },
+    { code: "reh", text: "Reha/Kur" },
+    { code: "hm", text: "Hamburger Modell" },
+    { code: "azk", text: "Arbeitszeitkonto" },
+    { code: "fu", text: "Fehlt unentschuldigt" },
+    { code: "bv", text: "Beschäftigtenvertretung" },
+	{ code: "dr", text: "Dienstreise/Fortbildung" }
   ];
 
   const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni",
                       "Juli", "August", "September", "Oktober", "November", "Dezember"];
 
 const selectedCells = new Set();
+const overlay = document.getElementById("eingabeOverlay");
 let isMouseDown = false;
 let dragRow = null;
 let dragCol = null;
 let dragDirection = null; // "row" oder "col"
+let tastaturPuffer = "";
 
   const urlParams = new URLSearchParams(window.location.search);
   const bereich = urlParams.get("bereich") || "pflege";
@@ -399,7 +417,7 @@ let dragDirection = null; // "row" oder "col"
 
   if (daten[tag]) {
 	td.textContent = daten[tag];
-		if (["K", "Ko", "EDK"].includes(daten[tag])) {
+		if (["k", "ko", "edk"].includes(daten[tag])) {
 			td.classList.add("critical");
 		}
 	}
@@ -412,6 +430,7 @@ let dragDirection = null; // "row" oder "col"
     dragCol = td.cellIndex;
     dragDirection = null; // Richtung wird erst beim Ziehen festgelegt
     toggleCell(td, e.ctrlKey);
+	console.log("Zelle markiert:", td.dataset.tag, td.dataset.name);
   });
 
   td.addEventListener("mouseover", () => {
@@ -507,7 +526,7 @@ let dragDirection = null; // "row" oder "col"
   datenGeändert = false;
   window.close(); // Fenster schließen
 })
-      .catch(err => alert("❌ Fehler beim Speichern"));
+      .catch(err => alert("Fehler bei der Dateispeicherung"));
   }
 
 const personFilter = urlParams.get("person");
@@ -555,7 +574,7 @@ fetch(fetchUrl)
 		selectedCells.forEach(cell => {
 		cell.textContent = k.code;
 		cell.classList.remove("selected");
-			if (["K", "Ko", "EDK"].includes(k.code)) {
+			if (["k", "ko", "edk"].includes(k.code)) {
 				cell.classList.add("critical");
 			} else {
 				cell.classList.remove("critical");
@@ -644,6 +663,69 @@ if (personFilter) {
 
   document.getElementById("zurueckContainer").appendChild(zurückBtn);
 }
+
+  //Tastatureingabe und Kürzelprüfung
+document.addEventListener("keydown", (e) => {
+  if (isReadonly || selectedCells.size === 0) return;
+
+  const erlaubteCodes = kuerzelLegende.map(k => k.code.toLowerCase());
+  const key = e.key.toLowerCase();
+// Eingabe abbrechen
+  if (key === "escape") {
+    tastaturPuffer = "";
+    overlay.style.display = "none";
+    return;
+  }
+
+// Eingabe abschließen
+  if (key === "enter") {
+    const code = tastaturPuffer.trim();
+    tastaturPuffer = "";
+    overlay.style.display = "none";
+
+    if (erlaubteCodes.includes(code)) {
+      selectedCells.forEach(td => {
+        td.textContent = code;
+        td.classList.remove("selected");
+
+        if (["k", "ko", "edk"].includes(code)) {
+          td.classList.add("critical");
+        } else {
+          td.classList.remove("critical");
+        }
+      });
+
+      selectedCells.clear();
+      datenGeändert = true;
+    } else {
+      alert(`❌ Ungültiges Kürzel: "${code}". Erlaubt sind: ${erlaubteCodes.join(", ")}`);
+    }
+
+    return;
+  }
+
+  if (key === "-") {
+    tastaturPuffer = "";
+    overlay.style.display = "none";
+
+    selectedCells.forEach(td => {
+      td.textContent = "";
+      td.classList.remove("selected", "critical");
+    });
+
+    selectedCells.clear();
+    datenGeändert = true;
+    return;
+  }
+
+  if (/^[a-zäöü]$/i.test(key)) {
+    tastaturPuffer += key;
+    overlay.textContent = `Eingabe: ${tastaturPuffer}`;
+    overlay.style.display = "block";
+  }
+});
+
+
 </script>
 
 </body>
