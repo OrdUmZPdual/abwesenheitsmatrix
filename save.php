@@ -42,7 +42,7 @@ $einJahr = 365 * 24 * 60 * 60;
 $heute = date("d.m.Y");
 $zeitstempel = date("d.m.Y H:i");
 
-$betreff = "Taegliche Bearbeitung – Bereich: $bereich ($heute)";
+$betreff = "Anwesenheiten im Bereich $bereich ($heute)";
 $nachricht = "Hallo Team,\n\n".
              "Die Anwesenheiten im Bereich \"$bereich\" wurden am $zeitstempel gespeichert.\n\n".
              "Dies ist die tägliche Bearbeitung.\n".
