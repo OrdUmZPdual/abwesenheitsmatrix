@@ -222,10 +222,11 @@ header h2, footer h2 {
 
     <div id="zurueckContainer"></div>
 
-    <div class="month-select">
-      <label for="monthSelect"><strong>Monat auswählen:</strong></label>
-      <select id="monthSelect"></select>
-    </div>
+    <div class="month-nav">
+		<button id="prevMonth">◀ Vorheriger Monat</button>
+		<span id="monatLabel"></span>
+		<button id="nextMonth">Nächster Monat ▶</button>
+	</div>
 
     <div class="button-bar" id="buttonBar"></div>
 
@@ -341,28 +342,22 @@ let tastaturPuffer = "";
     btn.textContent = box.classList.contains("legend-hidden") ? "🛈 Legende anzeigen" : "🛈 Legende ausblenden";
   }
 
-  function buildMonthSelect() {
-    const select = document.getElementById("monthSelect");
-    const heute = new Date();
-    for (let i = 0; i <= 1; i++) {
-      const d = new Date(heute.getFullYear(), heute.getMonth() - i, 1);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const value = `${y}-${m}`;
-      const option = document.createElement("option");
-      option.value = value;
-      option.textContent = `${monthNames[d.getMonth()]} ${y}`;
-      if (value === monat) option.selected = true;
-      select.appendChild(option);
-    }
+  function changeMonth(offset) {
+  const [jahr, m] = monat.split("-");
+  const date = new Date(parseInt(jahr), parseInt(m) - 1, 1);
+  date.setMonth(date.getMonth() + offset);
 
-    select.addEventListener("change", () => {
-      const newMonat = select.value;
-      const url = new URL(window.location.href);
-      url.searchParams.set("monat", newMonat);
-      window.location.href = url.toString();
-    });
-  }
+  const y = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const newMonat = `${y}-${mm}`;
+
+  const url = new URL(window.location.href);
+  url.searchParams.set("monat", newMonat);
+  window.location.href = url.toString();
+}
+
+document.getElementById("prevMonth").addEventListener("click", () => changeMonth(-1));
+document.getElementById("nextMonth").addEventListener("click", () => changeMonth(1));
 
   const table = document.getElementById("absenceTable");
   const theadRow = table.querySelector("thead tr");
@@ -635,7 +630,6 @@ buttonBar.appendChild(speichernBtn);
     legendenBody.appendChild(tr);
   }
 
-  buildMonthSelect();
   
   let datenGeändert = false;
 
@@ -725,10 +719,52 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+// Beim Laden prüfen, ob schon freigegeben
+let passwortFreigabe = sessionStorage.getItem("passwortFreigabe") === "true";
+
+function getMonthOffset(monat, offset) {
+  const [jahr, m] = monat.split("-");
+  const date = new Date(parseInt(jahr), parseInt(m) - 1, 1);
+  date.setMonth(date.getMonth() + offset);
+  const y = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  return `${y}-${mm}`;
+}
+
+function parseMonat(monatStr) {
+  const [jahr, m] = monatStr.split("-");
+  return new Date(parseInt(jahr), parseInt(m) - 1, 1);
+}
+
+function changeMonth(offset) {
+  const target = getMonthOffset(monat, offset);
+
+  // aktueller und letzter Monat berechnen
+  const now = new Date();
+  const letzterMonatDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+  const targetDate = parseMonat(target);
+
+  // Wenn Zielmonat älter als letzterMonat → Passwort abfragen (nur einmal pro Sitzung)
+  if (targetDate < letzterMonatDate && !passwortFreigabe) {
+    const pw = prompt("⚠️ Zugriff auf ältere Monate erfordert ein Passwort:");
+    if (pw !== "mozart") {
+      alert("❌ Falsches Passwort. Zugriff verweigert.");
+      return;
+    }
+    // Freigabe merken
+    passwortFreigabe = true;
+    sessionStorage.setItem("passwortFreigabe", "true");
+  }
+
+  // Seite laden
+  const url = new URL(window.location.href);
+  url.searchParams.set("monat", target);
+  window.location.href = url.toString();
+}
 
 </script>
 
 </body>
 
 </html>
-
