@@ -42,15 +42,14 @@ $einJahr = 365 * 24 * 60 * 60;
 $heute = date("d.m.Y");
 $zeitstempel = date("d.m.Y H:i");
 
-$betreff = "Tägliche Bearbeitung – Bereich: $bereich ($heute)";
+$betreff = "Taegliche Bearbeitung – Bereich: $bereich ($heute)";
 $nachricht = "Hallo Team,\n\n".
              "Die Anwesenheiten im Bereich \"$bereich\" wurden am $zeitstempel gespeichert.\n\n".
              "Dies ist die tägliche Bearbeitung.\n".
-             "Anzahl bearbeiteter Mitarbeiter: $anzahlMitarbeiter\n\n".
              "Viele Grüße\nEure Wissensdatenbank";
 
 @mail(
-    "l.schladebach@outlook.de",
+    "OrdUmZ@charlottenburg-wilmersdorf.de",
     $betreff,
     $nachricht,
     "From: dokuwiki@halvar01.ba-cw.verwalt-berlin.de\r\n"
